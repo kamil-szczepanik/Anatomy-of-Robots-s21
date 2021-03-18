@@ -24,7 +24,6 @@ class KeyBoardReader(Node):
         while True:
             self.scr.assign_key()
             unicode_char = self.scr.key
-            print(str(unicode_char) + ' <- unicode char')
             self.msg = String()         
             self.msg.data = chr(unicode_char)
             self.publish()
@@ -32,7 +31,6 @@ class KeyBoardReader(Node):
 
     def publish(self):
             self.publisher_.publish(self.msg)
-            print('publishing string...\n')
 
 
 

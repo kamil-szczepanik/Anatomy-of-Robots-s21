@@ -70,7 +70,6 @@ class MyTeleop(Node):
         if self.letter == przod:
             lin_vel = 0.9*gain
             ang_vel = 0.0
-            print(przod)
             return lin_vel, ang_vel
 
         elif self.letter == tyl:
