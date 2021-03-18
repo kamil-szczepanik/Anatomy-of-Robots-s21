@@ -7,149 +7,111 @@ from rclpy.exceptions import ParameterNotDeclaredException
 
 from geometry_msgs.msg import Twist
 
-######################
-import sys, termios, atexit
-from select import select
+from std_msgs.msg import String
 
-# Save normal terminal settings
-fd = sys.stdin.fileno()
-old_term = termios.tcgetattr(fd)
+import curses
 
-def set_normal_term():
-    termios.tcsetattr(fd, termios.TCSAFLUSH, old_term)
+import time
 
-# Debuffer new terminal until exit
-new_term = termios.tcgetattr(fd)
-new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
-
-def set_curses_term():
-    termios.tcsetattr(fd, termios.TCSAFLUSH, new_term)
-
-atexit.register(set_normal_term)
-set_curses_term()
-
-def kbhit():
-    dr,dw,de = select([sys.stdin], [], [], 0)
-    return dr != []
-
-def getch():
-    return sys.stdin.read(1)
-################
 
 class MyTeleop(Node):
 
     def __init__(self):
         super().__init__('my_teleop')
-        self.publisher_ = self.create_publisher(Twist, '/turtle1/cmd_vel', 10)
-        # timer_period = 0.5  # seconds
-        # self.timer = self.create_timer(timer_period, self.timer_callback)
-
-        self.declare_parameter('przod', 'w')
-        self.declare_parameter('tyl', 's')
-        self.declare_parameter('lewo', 'a')
-        self.declare_parameter('prawo', 'd')
-
-
-        przod = rclpy.parameter.Parameter(
-            'przod',
-            rclpy.Parameter.Type.STRING,
-            'w'
-        )
-        tyl = rclpy.parameter.Parameter(
-            'tyl',
-            rclpy.Parameter.Type.STRING,
-            's'
-        )
-        lewo = rclpy.parameter.Parameter(
-            'lewo',
-            rclpy.Parameter.Type.STRING,
-            'a'
-        )
-        prawo = rclpy.parameter.Parameter(
-            'prawo',
-            rclpy.Parameter.Type.STRING,
-            'd'
-        )
-        all_new_parameters = [przod, tyl, lewo, prawo]
-        self.set_parameters(all_new_parameters)
+        self.turtle = '/turtle1/'
+        self.topic = self.turtle + 'cmd_vel'
+        self.publisher_ = self.create_publisher(Twist, self.topic , 10)
+        self.subscription = self.create_subscription(String, 'keyboard_reader', self.listener_callback, 10)
+        self.subscription
+        self.setup_params()
+        self.previous_letter = None
         
-        # self.declare_parameters(
-        #     namespace='',
-        #     parameters=[
-        #         ('string', None),
-        #         ('string', None),
-        #         ('string', None),
-        #         ('string', None)
-        #     ])
 
-    # def timer_callback(self):
-    #     przod = self.get_parameter('przod').get_parameter_value().string_value
-    #     tyl = self.get_parameter('tyl').get_parameter_value().string_value
-    #     lewo = self.get_parameter('lewo').get_parameter_value().string_value
-    #     prawo = self.get_parameter('prawo').get_parameter_value().string_value
 
-    #     # przod = rclpy.parameter.Parameter(
-    #     #     'przod',
-    #     #     rclpy.Parameter.Type.STRING,
-    #     #     'w'
-    #     # )
-    #     # tyl = rclpy.parameter.Parameter(
-    #     #     'tyl',
-    #     #     rclpy.Parameter.Type.STRING,
-    #     #     's'
-    #     # )
-    #     # lewo = rclpy.parameter.Parameter(
-    #     #     'lewo',
-    #     #     rclpy.Parameter.Type.STRING,
-    #     #     'a'
-    #     # )
-    #     # prawo = rclpy.parameter.Parameter(
-    #     #     'prawo',
-    #     #     rclpy.Parameter.Type.STRING,
-    #     #     'd'
-    #     # )
-    #     # all_new_parameters = [przod, tyl, lewo, prawo]
-    #     # self.set_parameters(all_new_parameters)
-    #     # self.set_parameters(all_params)
+    def setup_params(self):
+        self.parameters = {}
+        self.declare_parameters(
+                namespace='',
+                parameters=[
+                    ('przod', 'w'),
+                    ('tyl', 's'),
+                    ('lewo', 'a'),
+                    ('prawo', 'd')
+                ])
+        self.parameters["przod"] = self.get_parameter("przod")._value
+        self.parameters["tyl"] = self.get_parameter("tyl")._value
+        self.parameters["lewo"] = self.get_parameter("lewo")._value
+        self.parameters["prawo"] = self.get_parameter("prawo")._value
 
-    #     #print("Sterowanie: " + przod " - przod , " + tyl " - tyl , " + lewo " - lewo , " + prawo " - prawo , q - wyjscie " )
-    #     while True:
-    #         if kbhit():
-    #             key = getch()
-    #             #handle_keypress(key)
-    #             letter = key
-    #             #letter = input("")
-    #             if letter == przod:
-    #                 lin_vel = 0.9
-    #                 ang_vel = 0.0
-    #             elif letter == tyl:
-    #                 lin_vel = -0.9
-    #                 ang_vel = 0.0
-    #             elif letter == lewo:
-    #                 lin_vel = 0.0
-    #                 ang_vel = 0.9
-    #             elif letter == prawo:
-    #                 lin_vel = 0.0
-    #                 ang_vel = -0.9
-    #             elif letter == "q":
-    #                 my_teleop.destroy_node()
-    #                 rclpy.shutdown()
-    #             else:
-    #                 lin_vel = 0.0
-    #                 ang_vel = 0.0
-    #                 break
-    #             msg = Twist()
-    #             msg.linear.x = lin_vel
-    #             msg.linear.y = 0.0
-    #             msg.linear.z = 0.0
-    #             msg.angular.x = 0.0
-    #             msg.angular.y = 0.0
-    #             msg.angular.z = ang_vel
-    #             lin_vel = msg.linear.x
-    #             ang_vel = msg.angular.x
-    #             self.publisher_.publish(msg)
-    #             break
-    #                 #self.get_logger().info('\nPublishing: \nangular: %d\nlinear: %d' % (lin_vel, ang_vel))
+    def listener_callback(self, msg):
+        self.letter = msg.data
+        self.get_logger().info('I heard: "%s"' % msg.data)
+        self.publish()
+        self.previous_letter = msg.data
+
+    
+        
+    def get_velocity_from_letter(self):
+
+        if self.previous_letter is not None and self.previous_letter==self.letter:
+            gain = 1.2
+        else:
+            gain = 1
+
+        self.parameters["przod"] = self.get_parameter("przod")._value
+        self.parameters["tyl"] = self.get_parameter("tyl")._value
+        self.parameters["lewo"] = self.get_parameter("lewo")._value
+        self.parameters["prawo"] = self.get_parameter("prawo")._value
+        przod = self.parameters["przod"]
+        tyl = self.parameters["tyl"]
+        lewo = self.parameters["lewo"]
+        prawo = self.parameters["prawo"]      
+
+        if self.letter == przod:
+            lin_vel = 0.9*gain
+            ang_vel = 0.0
+            print(przod)
+            return lin_vel, ang_vel
+
+        elif self.letter == tyl:
+            lin_vel = -0.9
+            ang_vel = 0.0
+            return lin_vel, ang_vel
+
+        elif self.letter == lewo:
+            lin_vel = 0.0
+            ang_vel = 0.9
+            return lin_vel, ang_vel
+
+        elif self.letter == prawo:
+            lin_vel = 0.0
+            ang_vel = -0.9
+            return lin_vel, ang_vel
+
+        elif self.letter == "q":
+            self.stop = True
+
+        else:
+            lin_vel = 0.0
+            ang_vel = 0.0    
+            return lin_vel, ang_vel      
+
+    def get_message_to_publish(self):
+        lin_vel, ang_vel = self.get_velocity_from_letter()
+        msg = Twist()
+        msg.linear.x = lin_vel
+        msg.linear.y = 0.0
+        msg.linear.z = 0.0
+        msg.angular.x = 0.0
+        msg.angular.y = 0.0
+        msg.angular.z = ang_vel
+
+        return msg
+
+    def publish(self):
+        msg = self.get_message_to_publish()
+        self.publisher_.publish(msg)
+        print('  GO! \n')
 
 
 
@@ -157,49 +119,6 @@ def main(args=None):
     rclpy.init(args=args)
 
     my_teleop = MyTeleop()
-
-    przod = my_teleop.get_parameter('przod').get_parameter_value().string_value
-    tyl = my_teleop.get_parameter('tyl').get_parameter_value().string_value
-    lewo = my_teleop.get_parameter('lewo').get_parameter_value().string_value
-    prawo = my_teleop.get_parameter('prawo').get_parameter_value().string_value
-
-    while True:
-        if kbhit():
-            key = getch()
-            #handle_keypress(key)
-            letter = key
-            #letter = input("")
-            if letter == przod:
-                lin_vel = 0.9
-                ang_vel = 0.0
-            elif letter == tyl:
-                lin_vel = -0.9
-                ang_vel = 0.0
-            elif letter == lewo:
-                lin_vel = 0.0
-                ang_vel = 0.9
-            elif letter == prawo:
-                lin_vel = 0.0
-                ang_vel = -0.9
-            elif letter == "q":
-                my_teleop.destroy_node()
-                rclpy.shutdown()
-            else:
-                lin_vel = 0.0
-                ang_vel = 0.0
-                break
-            msg = Twist()
-            msg.linear.x = lin_vel
-            msg.linear.y = 0.0
-            msg.linear.z = 0.0
-            msg.angular.x = 0.0
-            msg.angular.y = 0.0
-            msg.angular.z = ang_vel
-            lin_vel = msg.linear.x
-            ang_vel = msg.angular.x
-            my_teleop.publisher_.publish(msg)
-            
-
     rclpy.spin(my_teleop)
 
     # Destroy the node explicitly
@@ -207,7 +126,6 @@ def main(args=None):
     # when the garbage collector destroys the node object)
     my_teleop.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()

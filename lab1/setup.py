@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'my_teleop = lab1.my_pub:main',
+            'keyboard_reader_node = lab1.keyboard_reader:main'
         ],
     },
 )

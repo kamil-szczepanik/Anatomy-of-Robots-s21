@@ -10,8 +10,13 @@ def generate_launch_description():
             ),
             Node(
                 package='lab1',
-                executable='my_teleop',
+                executable='my_teleop'
                 name='my_teleop',
+            ),
+            Node(
+                package='lab1',
+                executable='keyboard_reader',
+                name='keyboard_reader',
                 prefix=["gnome-terminal ", "-- "],
                 output='screen'
             )
