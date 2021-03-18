@@ -7,7 +7,7 @@ from rclpy.exceptions import ParameterNotDeclaredException
 
 from geometry_msgs.msg import Twist
 
-from std_msgs.msg import String
+from std_msgs.msg import String, Float32MultiArray
 
 import curses
 
@@ -25,6 +25,8 @@ class MyTeleop(Node):
         self.subscription
         self.setup_params()
         self.previous_letter = None
+
+        self.param_publisher_ = self.create_publisher(Float32MultiArray, 'param_topic', 10)
         
 
 
@@ -48,8 +50,6 @@ class MyTeleop(Node):
         self.get_logger().info('I heard: "%s"' % msg.data)
         self.publish()
         self.previous_letter = msg.data
-
-    
         
     def get_velocity_from_letter(self):
 
@@ -68,24 +68,24 @@ class MyTeleop(Node):
         prawo = self.parameters["prawo"]      
 
         if self.letter == przod:
-            lin_vel = 0.9*gain
+            lin_vel = 1.0
             ang_vel = 0.0
             print(przod)
             return lin_vel, ang_vel
 
         elif self.letter == tyl:
-            lin_vel = -0.9
+            lin_vel = -1.0
             ang_vel = 0.0
             return lin_vel, ang_vel
 
         elif self.letter == lewo:
             lin_vel = 0.0
-            ang_vel = 0.9
+            ang_vel = 1.0
             return lin_vel, ang_vel
 
         elif self.letter == prawo:
             lin_vel = 0.0
-            ang_vel = -0.9
+            ang_vel = -1.0
             return lin_vel, ang_vel
 
         elif self.letter == "q":
@@ -111,8 +111,16 @@ class MyTeleop(Node):
     def publish(self):
         msg = self.get_message_to_publish()
         self.publisher_.publish(msg)
-        print('  GO! \n')
 
+        param_msg = self.get_param_message()
+        self.param_publisher_.publish(param_msg)
+
+    def get_param_message(self):
+        msg = Float32MultiArray()
+        if not bool(self.parameters):
+            lin_vel, ang_vel = self.get_velocity_from_letter()
+            msg.data = [ord(self.parameters['przod']), ord(self.parameters['tyl']), ord(self.parameters['lewo']), ord(self.parameters['prawo']), lin_vel, ang_vel]
+        return msg
 
 
 def main(args=None):
