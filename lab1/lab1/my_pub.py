@@ -21,14 +21,12 @@ class MyTeleop(Node):
         self.turtle = '/turtle1/'
         self.topic = self.turtle + 'cmd_vel'
         self.publisher_ = self.create_publisher(Twist, self.topic , 10)
+        self.param_publisher_ = self.create_publisher(Float32MultiArray, 'param_topic', 10)          
         self.subscription = self.create_subscription(String, 'keyboard_reader', self.listener_callback, 10)
+        self.first = True
         self.subscription
         self.setup_params()
         self.previous_letter = None
-
-        self.param_publisher_ = self.create_publisher(Float32MultiArray, 'param_topic', 10)
-        
-
 
     def setup_params(self):
         self.parameters = {}
@@ -46,10 +44,18 @@ class MyTeleop(Node):
         self.parameters["prawo"] = self.get_parameter("prawo")._value
 
     def listener_callback(self, msg):
-        self.letter = msg.data
-        self.get_logger().info('I heard: "%s"' % msg.data)
-        self.publish()
-        self.previous_letter = msg.data
+        if self.first == True:
+            param_msg = self.get_param_message()
+            self.param_publisher_.publish(param_msg)
+            self.first = False
+        else:
+            self.letter = msg.data
+            self.get_logger().info('I heard: "%s"' % msg.data)
+            self.publish()
+            param_msg = self.get_param_message()
+            self.param_publisher_.publish(param_msg)
+            self.previous_letter = msg.data
+
         
     def get_velocity_from_letter(self):
 
@@ -89,6 +95,10 @@ class MyTeleop(Node):
 
         elif self.letter == "q":
             self.stop = True
+            rclpy.spin(self)
+            self.destroy_node()
+            rclpy.shutdown()
+
 
         else:
             lin_vel = 0.0
@@ -104,21 +114,19 @@ class MyTeleop(Node):
         msg.angular.x = 0.0
         msg.angular.y = 0.0
         msg.angular.z = ang_vel
-
         return msg
 
     def publish(self):
         msg = self.get_message_to_publish()
         self.publisher_.publish(msg)
 
-        param_msg = self.get_param_message()
-        self.param_publisher_.publish(param_msg)
-
     def get_param_message(self):
         msg = Float32MultiArray()
-        if not bool(self.parameters):
+        if self.first == True:
+            msg.data = [float(ord(self.parameters['przod'])), float(ord(self.parameters['tyl'])), float(ord(self.parameters['lewo'])), float(ord(self.parameters['prawo'])), 0.0 , 0.0 ]
+        elif bool(self.parameters):
             lin_vel, ang_vel = self.get_velocity_from_letter()
-            msg.data = [ord(self.parameters['przod']), ord(self.parameters['tyl']), ord(self.parameters['lewo']), ord(self.parameters['prawo']), lin_vel, ang_vel]
+            msg.data = [float(ord(self.parameters['przod'])), float(ord(self.parameters['tyl'])), float(ord(self.parameters['lewo'])), float(ord(self.parameters['prawo'])), lin_vel, ang_vel]
         return msg
 
 
