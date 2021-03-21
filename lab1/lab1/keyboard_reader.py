@@ -50,6 +50,7 @@ class KeyBoardReader(Node):
             self.scr.screen.refresh()
             curses.endwin()
             system("killall turtlesim_node")
+            system("killall my_teleop")
             system("killall keyboard_reader")
     
     def print_control_info(self):
@@ -125,7 +126,7 @@ def main(args=None):
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    my_teleop.destroy_node()
+    keyboard_reader_node.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
