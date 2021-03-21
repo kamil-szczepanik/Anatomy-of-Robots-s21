@@ -99,7 +99,6 @@ class MyTeleop(Node):
             self.destroy_node()
             rclpy.shutdown()
 
-
         else:
             lin_vel = 0.0
             ang_vel = 0.0    
