@@ -2,9 +2,9 @@
 
 <link name="base">
   <visual>
-    <origin xyz="0.0 0 0.2" rpy="0 0 0"/>
+    <origin xyz="0.15 0 0.2" rpy="0 0.6435011087932844 0"/>
       <geometry>
-        <cylinder radius="0.05" length="0"/>
+        <cylinder radius="0.05" length="0.5"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -13,7 +13,7 @@
 </link>
 
 <joint name="base-base_ext" type="revolute">
-  <origin xyz="0 0 0" rpy="0 0 0"/>
+  <origin xyz="0.3 0 0.4" rpy="0 0 0"/>
   <parent link="base"/>
   <child link="base_ext"/>
   <axis xyz="0 0 1"/>
@@ -22,9 +22,9 @@
 
 <link name="base_ext">
   <visual>
-    <origin xyz="0.0 0 0.0" rpy="0 0 0"/>
+    <origin xyz="1.0 0 1.0" rpy="0 0.7853981633974482 0"/>
       <geometry>
-        <cylinder radius="0.05" length="0"/>
+        <cylinder radius="0.05" length="2.8284271247461903"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -33,7 +33,7 @@
 </link>
 
 <joint name="base_ext-arm" type="revolute">
-  <origin xyz="0 0 0" rpy="-1.57 0 0"/>
+  <origin xyz="2 0 2" rpy="-1.57 0 0"/>
   <parent link="base_ext"/>
   <child link="arm"/>
   <axis xyz="0 0 1"/>
@@ -42,9 +42,9 @@
 
 <link name="arm">
   <visual>
-    <origin xyz="0.5 0 0.0" rpy="0 1.57 0"/>
+    <origin xyz="0.5 0 1.5" rpy="0 0.3217505543966422 0"/>
       <geometry>
-        <cylinder radius="0.05" length="1"/>
+        <cylinder radius="0.05" length="3.1622776601683795"/>
       </geometry>
       <material name="white">
         <color rgba="1 1 1 1"/>
@@ -53,7 +53,7 @@
 </link>
 
 <joint name="arm-hand" type="revolute">
-  <origin xyz="1 0 0" rpy="0 0 0"/>
+  <origin xyz="1 0 3" rpy="2 0 0"/>
   <parent link="arm"/>
   <child link="hand"/>
   <axis xyz="0 0 1"/>
@@ -62,7 +62,7 @@
 
 <link name="hand">
   <visual>
-    <origin xyz="0.35 0 0.0" rpy="0 1.57 0"/>
+    <origin xyz="0.35 0 0.0" rpy="0 1.5707963267948966 0"/>
       <geometry>
         <cylinder radius="0.05" length="0.7"/>
       </geometry>
