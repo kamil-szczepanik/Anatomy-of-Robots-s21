@@ -40,7 +40,7 @@ class StatePublisher(Node):
               # update joint_state
               now = self.get_clock().now()
               joint_state.header.stamp = now.to_msg()
-              joint_state.name = ['base-connect', 'base-arm', 'arm-hand']
+              joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
               joint_state.position = [base_connect, base_arm, arm_hand]
 
               # update transform
@@ -59,10 +59,10 @@ class StatePublisher(Node):
 
               # Create new robot state
               base_connect += 0.002
-              if base_arm < 2:
-                base_arm += 0.004
-              if arm_hand > -3.14:
-                arm_hand -= 0.01
+              #if base_arm < 2:
+              base_arm += 0.004
+              #if arm_hand > -3.14:
+              arm_hand -= 0.01
 
               # This will adjust as needed per iteration
               loop_rate.sleep()
