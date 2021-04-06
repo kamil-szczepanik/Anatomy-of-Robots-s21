@@ -32,5 +32,6 @@ def generate_launch_description():
           package='lab2',
           executable='state_publisher',
           name='state_publisher',
-          output='screen'),
+          output='screen',
+          parameters=["./lab2/config/pos_params.yaml"]),
   ])
