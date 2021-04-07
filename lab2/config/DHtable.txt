@@ -1,5 +1,5 @@
 a   d   alpha   theta   name
-0   0.4   0       x       base
-0   0   -1.57   x       base_ext
-1   0   0       x       arm
-0.7 0   0       0       hand
+0   0   0       x       base
+0   0   0   x       base_ext
+0.5   0   -1.57       x       arm
+0.2 0   0       0       hand

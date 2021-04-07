@@ -23,8 +23,9 @@ class StatePublisher(Node):
 
       # robot state
       base_connect = 0.0
-      base_arm = 0.0
-      arm_hand = 0.0
+      base_arm = -1.57
+      arm_hand = -1.57
+      hand_tool = 0.0
       angle = 0.0
 
       # message declarations
@@ -46,23 +47,23 @@ class StatePublisher(Node):
               # update transform
               # (moving in a circle with radius=2)
               
-              odom_trans.header.stamp = now.to_msg()
-              odom_trans.transform.translation.x = cos(angle)*0
-              odom_trans.transform.translation.y = sin(angle)*0
-              odom_trans.transform.translation.z = 0.0
-              odom_trans.transform.rotation = \
-                  euler_to_quaternion(0, 0, angle + pi/2) # roll,pitch,yaw
+              # odom_trans.header.stamp = now.to_msg()
+              # odom_trans.transform.translation.x = 0.0
+              # odom_trans.transform.translation.y = 0.0
+              # odom_trans.transform.translation.z = 0.0
+              # odom_trans.transform.rotation = \
+              #     euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
 
               # send the joint state and transform
               self.joint_pub.publish(joint_state)
               self.broadcaster.sendTransform(odom_trans)
 
-              # Create new robot state
-              base_connect += 0.002
-              #if base_arm < 2:
-              base_arm += 0.004
-              #if arm_hand > -3.14:
-              arm_hand -= 0.01
+              # # Create new robot state
+              # base_connect += 0.000
+              # #if base_arm < 2:
+              # base_arm += 0.000
+              # #if arm_hand > -3.14:
+              # arm_hand -= 0.00
 
               # This will adjust as needed per iteration
               loop_rate.sleep()

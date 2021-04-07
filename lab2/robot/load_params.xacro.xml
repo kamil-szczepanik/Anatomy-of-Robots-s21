@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  
+  <xacro:property name="yaml_file" value="$(find lab2)/config/params.yaml" />
+  <xacro:property name="params" value="${load_yaml(yaml_file)}"/>
+
+  <xacro:property name="a1" value="${params['a1']}" />
+  <xacro:property name="d1" value="${ params['d1']}" />
+  <xacro:property name="a2" value="${params['a2']}" />
+  <xacro:property name="d2" value="${params['d2']}" />
+  <xacro:property name="a3" value="${params['a3']}" />
+  <xacro:property name="d3" value="${params['d3']}" />
+
+  <xacro:property name="link_00_name" value="base" />
+  <xacro:property name="link_01_name" value="base_ext" />
+  <xacro:property name="link_02_name" value="arm" />
+  <xacro:property name="link_03_name" value="hand" />
+  <xacro:property name="link_04_name" value="tool" />
+  <xacro:property name="link_05_name" value="link_05" />
+  
+</robot>
