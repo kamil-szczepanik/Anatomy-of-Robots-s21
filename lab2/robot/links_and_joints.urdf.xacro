@@ -1,11 +1,12 @@
 <robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find lab2)/robot/materials.xacro.xml" />
+  <xacro:include filename="$(find lab2)/materials.urdf.xacro" />
 
     <xacro:macro name="m_link_cylinder" params="name origin_xyz origin_rpy radius length material">
         <link name="${name}">
           <inertial>
-            <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+            <mass value="10" />
+            <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="100" />
           </inertial>
           <collision>
             <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
@@ -37,7 +38,6 @@
     <link name="${name}">
       <inertial>
         <mass value="10" />
-        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
         <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="100" />
       </inertial>
       <collision>

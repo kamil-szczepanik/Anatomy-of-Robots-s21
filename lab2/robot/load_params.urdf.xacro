@@ -2,7 +2,7 @@
 <robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
   
   
-  <xacro:property name="yaml_file" value="$(find lab2)/config/params.yaml" />
+  <xacro:property name="yaml_file" value="$(find lab2)/params.yaml" />
   <xacro:property name="params" value="${load_yaml(yaml_file)}"/>
 
   <xacro:property name="a1" value="${params['a1']}" />
