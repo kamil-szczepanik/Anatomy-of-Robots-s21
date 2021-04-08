@@ -56,4 +56,22 @@
     </link>
   </xacro:macro>
 
+
+  <xacro:macro name="m_gun" params="name origin_xyz origin_rpy scale">
+    <link name="${name}">
+      <!-- <collision>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <box size="${size}" />
+        </geometry>
+      </collision> -->
+      <visual>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <mesh filename = "package://lab2/gatling.stl" scale="${scale}"/>
+        </geometry>
+      </visual>
+    </link>
+  </xacro:macro>
+
 </robot>

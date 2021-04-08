@@ -41,8 +41,8 @@ class StatePublisher(Node):
               # update joint_state
               now = self.get_clock().now()
               joint_state.header.stamp = now.to_msg()
-              joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
-              joint_state.position = [base_connect, base_arm, arm_hand]
+              joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
+              joint_state.position = [base_connect, base_arm, arm_hand, hand_tool]
 
               # update transform
               # (moving in a circle with radius=2)
