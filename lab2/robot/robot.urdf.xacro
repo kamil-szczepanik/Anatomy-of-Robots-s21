@@ -21,7 +21,7 @@
     origin_xyz="0 0 0.05"
     parent="base" 
     child="base_ext"
-    limit_lower="0" limit_upper="0">
+    limit_lower="-3.14" limit_upper="3.14">
   </xacro:m_joint>
            
   <xacro:m_link_cylinder name="base_ext"
@@ -36,11 +36,11 @@
   <xacro:m_joint name="base_ext-arm" 
     type="revolute"
     axis_xyz="0 0 1"
-    origin_rpy="0 0 0" 
+    origin_rpy="${pi/2} 0 0" 
     origin_xyz="0 0 0"
     parent="base_ext" 
     child="arm"
-    limit_lower="0" limit_upper="0">
+    limit_lower="-3.14" limit_upper="3.14">
   </xacro:m_joint>
            
   <xacro:m_link_cylinder name="arm"

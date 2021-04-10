@@ -67,6 +67,7 @@ class StatePublisher(Node):
 
               # This will adjust as needed per iteration
               loop_rate.sleep()
+              break
 
       except KeyboardInterrupt:
           pass

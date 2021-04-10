@@ -39,23 +39,13 @@ def run_xacro(xacro_file):
 def generate_launch_description():
 
   use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-  urdf_file_name = 'robot.urdf.xml'
   xacro_file_name = 'robot.urdf.xacro'
-
-  print("urdf_file_name : {}".format(urdf_file_name))
-
-#   urdf = os.path.join(
-#       get_package_share_directory('lab2'),
-#       urdf_file_name)
-
-#   xacro_file = os.path.join(
-#       get_package_share_directory('lab2'),
-#       xacro_file_name)
+  print("urdf_file_name : {}".format(xacro_file_name))
   
-  xacro_file = get_package_file('lab2', 'robot.urdf.xacro')
+  xacro_file = get_package_file('lab2', xacro_file_name)
   urdf_file = run_xacro(xacro_file)
 
-  print(urdf_file)
+#   print(urdf_file)
 
   return LaunchDescription([
       DeclareLaunchArgument(
@@ -63,15 +53,11 @@ def generate_launch_description():
           default_value='false',
           description='Use simulation (Gazebo) clock if true'),
       Node(
-          package='robot_state_publisher',
-          executable='robot_state_publisher',
-          name='robot_state_publisher',
-          output='screen',
-          parameters=[{'use_sim_time': use_sim_time}],
-          arguments=[urdf_file]),
+          package='joint_state_publisher',
+          executable='joint_state_publisher',
+          name='joint_state_publisher'),
       Node(
-          package='lab2',
-          executable='state_publisher',
-          name='state_publisher',
-          output='screen'),
+          package='joint_state_publisher_gui',
+          executable='joint_state_publisher_gui',
+          name='joint_state_publisher_gui'),
   ])
