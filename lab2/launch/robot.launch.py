@@ -44,7 +44,8 @@ def generate_launch_description():
   
   xacro_file = get_package_file('lab2', xacro_file_name)
   urdf_file = run_xacro(xacro_file)
-
+  
+  
 #   print(urdf_file)
 
   return LaunchDescription([

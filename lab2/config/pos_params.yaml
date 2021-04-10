@@ -1,0 +1,12 @@
+state_publisher:
+  ros__parameters:
+    theta1: 0.0
+    theta2: -1.57
+    theta3: 1.57
+    theta4: 1.57
+    a1: 0.0
+    d1: 0.0
+    a2: 1.0
+    d2: 0.0
+    a3: 0.5
+    d3: 0.0

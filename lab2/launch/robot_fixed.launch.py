@@ -38,14 +38,18 @@ def run_xacro(xacro_file):
 
 def generate_launch_description():
 
+  param_file_name = 'params.yaml'
+  param_file = get_package_file('lab2', param_file_name)
+
+  pos_param_file_name = 'pos_params.yaml'
+  pos_param_file = get_package_file('lab2', pos_param_file_name)
+
   use_sim_time = LaunchConfiguration('use_sim_time', default='false')
   xacro_file_name = 'robot.urdf.xacro'
   print("urdf_file_name : {}".format(xacro_file_name))
   
   xacro_file = get_package_file('lab2', xacro_file_name)
   urdf_file = run_xacro(xacro_file)
-
-#   print(urdf_file)
 
   return LaunchDescription([
       DeclareLaunchArgument(
@@ -63,5 +67,6 @@ def generate_launch_description():
           package='lab2',
           executable='state_publisher',
           name='state_publisher',
-          output='screen'),
+          output='screen',
+          parameters=[pos_param_file]),
   ])

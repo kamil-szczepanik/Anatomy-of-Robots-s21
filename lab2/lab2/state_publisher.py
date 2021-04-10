@@ -7,70 +7,85 @@ from rclpy.qos import QoSProfile
 from geometry_msgs.msg import Quaternion
 from sensor_msgs.msg import JointState
 from tf2_ros import TransformBroadcaster, TransformStamped
+from rclpy.exceptions import ParameterNotDeclaredException
+from rcl_interfaces.msg import ParameterType
+
 class StatePublisher(Node):
 
   def __init__(self):
-      rclpy.init()
-      super().__init__('state_publisher')
+    rclpy.init()
+    super().__init__('state_publisher')
 
-      qos_profile = QoSProfile(depth=10)
-      self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
-      self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
-      self.nodeName = self.get_name()
-      self.get_logger().info("{0} started".format(self.nodeName))
+    qos_profile = QoSProfile(depth=10)
+    self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
+    self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
+    self.nodeName = self.get_name()
 
-      loop_rate = self.create_rate(30)
+    self.get_logger().info("{0} started".format(self.nodeName))
+    self.params = {}
+    self.declare_parameters(
+      namespace='',
+      parameters=[
+        ('theta1', 0.0),
+        ('theta2', -1.57),
+        ('theta3', 1.57),
+        ('theta4', 0.0),
+        ('a1', 0.0),
+        ('d1', 0.0),
+        ('a2', 1.0),
+        ('d2', 0.0),
+        ('a3', 0.5),
+        ('d3', 0.0),
+      ])
+  
+    self.params['theta1'] = self.get_parameter('theta1')._value
+    self.params['theta2'] = self.get_parameter('theta2')._value
+    self.params['theta3'] = self.get_parameter('theta3')._value
+    self.params['theta4'] = self.get_parameter('theta4')._value
+    # self.params['a1'] = self.get_parameter('a1')._value
+    # self.params['d1'] = self.get_parameter('d1')._value
+    # self.params['a2'] = self.get_parameter('a2')._value
+    # self.params['d2'] = self.get_parameter('d2')._value
+    # self.params['a3'] = self.get_parameter('a3')._value
+    # self.params['d3'] = self.get_parameter('d3')._value
 
-      # robot state
-      base_connect = 0.0
-      base_arm = -1.57
-      arm_hand = -1.57
-      hand_tool = 0.0
-      angle = 0.0
+    #timer
+    #self.timer = self.create_timer(0.05, self.move)
 
-      # message declarations
-      odom_trans = TransformStamped()
-      odom_trans.header.frame_id = 'odom'
-      odom_trans.child_frame_id = 'base'
-      joint_state = JointState()
+    # robot state
+    self.theta1 = self.params['theta1']
+    self.theta2 = self.params['theta2']
+    self.theta3 = self.params['theta3']
+    self.theta4 = self.params['theta4']
 
-      try:
-          while rclpy.ok():
-              rclpy.spin_once(self)
 
-              # update joint_state
-              now = self.get_clock().now()
-              joint_state.header.stamp = now.to_msg()
-              joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
-              joint_state.position = [base_connect, base_arm, arm_hand, hand_tool]
 
-              # update transform
-              # (moving in a circle with radius=2)
-              
-              odom_trans.header.stamp = now.to_msg()
-              odom_trans.transform.translation.x = 0.0
-              odom_trans.transform.translation.y = 0.0
-              odom_trans.transform.translation.z = 0.0
-              odom_trans.transform.rotation = \
-                  euler_to_quaternion(0, 0, 0) # roll,pitch,yaw
 
-              # send the joint state and transform
-              self.joint_pub.publish(joint_state)
-              self.broadcaster.sendTransform(odom_trans)
+    # message declarations
+    self.odom_trans = TransformStamped()
+    self.odom_trans.header.frame_id = 'odom'
+    self.odom_trans.child_frame_id = 'base'
+    self.joint_state = JointState()
 
-              # # Create new robot state
-              base_connect += 0.000
-              #if base_arm < 2:
-              base_arm += 0.000
-              #if arm_hand > -3.14:
-              arm_hand -= 0.00
+    now = self.get_clock().now()
+    self.joint_state.header.stamp = now.to_msg()
+    self.joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
+    self.joint_state.position = [self.theta1, self.theta2, self.theta3, self.theta4]
 
-              # This will adjust as needed per iteration
-              loop_rate.sleep()
-              break
+    # update transform
+    
+    self.odom_trans.header.stamp = now.to_msg()
+    self.odom_trans.transform.translation.x = 0.0
+    self.odom_trans.transform.translation.y = 0.0
+    self.odom_trans.transform.translation.z = 0.0
+    self.odom_trans.transform.rotation = \
+        euler_to_quaternion(0, 0, pi/2) # roll,pitch,yaw
 
-      except KeyboardInterrupt:
-          pass
+    # send the joint state and transform
+    self.joint_pub.publish(self.joint_state)
+    self.broadcaster.sendTransform(self.odom_trans)
+  
+  
 
 def euler_to_quaternion(roll, pitch, yaw):
   qx = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2)
@@ -81,6 +96,10 @@ def euler_to_quaternion(roll, pitch, yaw):
 
 def main():
   node = StatePublisher()
+  rclpy.spin(node)
+
+  node.destroy_node()
+  rclpy.shutdown()
 
 if __name__ == '__main__':
   main()
