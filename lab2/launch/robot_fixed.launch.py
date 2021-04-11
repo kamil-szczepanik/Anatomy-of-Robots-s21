@@ -12,22 +12,6 @@ def get_package_file(package, file_path):
     absolute_file_path = os.path.join(get_package_share_directory('lab2'), file_path)
     return absolute_file_path
 
-def load_file(file_path):
-    """Load the contents of a file into a string"""
-    try:
-        with open(file_path, 'r') as file:
-            return file.read()
-    except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
-        return None
-
-def load_yaml(file_path):
-    """Load a yaml file into a dictionary"""
-    try:
-        with open(file_path, 'r') as file:
-            return yaml.safe_load(file)
-    except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
-        return None
-
 def run_xacro(xacro_file):
     """Run xacro and output a file in the same directory with the same name, w/o a .xacro suffix"""
     urdf_file, ext = os.path.splitext(xacro_file)

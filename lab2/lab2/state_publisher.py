@@ -42,24 +42,12 @@ class StatePublisher(Node):
     self.params['theta2'] = self.get_parameter('theta2')._value
     self.params['theta3'] = self.get_parameter('theta3')._value
     self.params['theta4'] = self.get_parameter('theta4')._value
-    # self.params['a1'] = self.get_parameter('a1')._value
-    # self.params['d1'] = self.get_parameter('d1')._value
-    # self.params['a2'] = self.get_parameter('a2')._value
-    # self.params['d2'] = self.get_parameter('d2')._value
-    # self.params['a3'] = self.get_parameter('a3')._value
-    # self.params['d3'] = self.get_parameter('d3')._value
-
-    #timer
-    #self.timer = self.create_timer(0.05, self.move)
 
     # robot state
     self.theta1 = self.params['theta1']
     self.theta2 = self.params['theta2']
     self.theta3 = self.params['theta3']
     self.theta4 = self.params['theta4']
-
-
-
 
     # message declarations
     self.odom_trans = TransformStamped()
@@ -84,7 +72,6 @@ class StatePublisher(Node):
     # send the joint state and transform
     self.joint_pub.publish(self.joint_state)
     self.broadcaster.sendTransform(self.odom_trans)
-  
   
 
 def euler_to_quaternion(roll, pitch, yaw):
