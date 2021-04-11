@@ -1,3 +1,4 @@
+
 <robot name="robot">
 
 <link name="base">
@@ -16,8 +17,8 @@
   <origin xyz="0 0 0" rpy="0 0 0"/>
   <parent link="base"/>
   <child link="base_ext"/>
-  <axis xyz="0 0 1"/>
-  <limit upper="0" lower="0" effort="10" velocity="10"/>
+  <axis xyz="0 0 1" />
+  <limit upper="0" lower="0.0" effort="10" velocity="10" />
 </joint>
 
 <link name="base_ext">
@@ -37,7 +38,7 @@
   <parent link="base_ext"/>
   <child link="arm"/>
   <axis xyz="0 0 1"/>
-  <limit upper="0" lower="0" effort="10" velocity="10"/>
+  <limit upper="0.0" lower="0.0" effort="10" velocity="10" />
 </joint>
 
 <link name="arm">
@@ -57,7 +58,7 @@
   <parent link="arm"/>
   <child link="hand"/>
   <axis xyz="0 0 1"/>
-  <limit upper="0" lower="0" effort="10" velocity="10"/>
+  <limit upper="0" lower="0" effort="10" velocity="10" />
 </joint>
 
 <link name="hand">
