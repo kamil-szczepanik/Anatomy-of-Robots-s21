@@ -35,22 +35,20 @@ class StatePublisher(Node):
         ('a2', 1.0),
         ('d2', 0.0),
         ('a3', 0.5),
-        ('d3', 0.0),
+        ('d3', 0.0)
       ])
   
     self.params['theta1'] = self.get_parameter('theta1')._value
     self.params['theta2'] = self.get_parameter('theta2')._value
     self.params['theta3'] = self.get_parameter('theta3')._value
     self.params['theta4'] = self.get_parameter('theta4')._value
-    # self.params['a1'] = self.get_parameter('a1')._value
-    # self.params['d1'] = self.get_parameter('d1')._value
-    # self.params['a2'] = self.get_parameter('a2')._value
-    # self.params['d2'] = self.get_parameter('d2')._value
-    # self.params['a3'] = self.get_parameter('a3')._value
-    # self.params['d3'] = self.get_parameter('d3')._value
-
-    #timer
-    #self.timer = self.create_timer(0.05, self.move)
+    self.params['a1'] = self.get_parameter('a1')._value
+    self.params['d1'] = self.get_parameter('d1')._value
+    self.params['a2'] = self.get_parameter('a2')._value
+    self.params['d2'] = self.get_parameter('d2')._value
+    self.params['a3'] = self.get_parameter('a3')._value
+    self.params['d3'] = self.get_parameter('d3')._value
+    
 
     # robot state
     self.theta1 = self.params['theta1']
@@ -58,34 +56,36 @@ class StatePublisher(Node):
     self.theta3 = self.params['theta3']
     self.theta4 = self.params['theta4']
 
-
-
-
     # message declarations
     self.odom_trans = TransformStamped()
-    self.odom_trans.header.frame_id = 'odom'
-    self.odom_trans.child_frame_id = 'base'
+    self.odom_trans.header.frame_id = 'base'
+    self.odom_trans.child_frame_id = 'base_ext'
     self.joint_state = JointState()
 
-    now = self.get_clock().now()
-    self.joint_state.header.stamp = now.to_msg()
-    self.joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
-    self.joint_state.position = [self.theta1, self.theta2, self.theta3, self.theta4]
+    self.move()
 
-    # update transform
+
+  def move(self):
     
-    self.odom_trans.header.stamp = now.to_msg()
-    self.odom_trans.transform.translation.x = 0.0
-    self.odom_trans.transform.translation.y = 0.0
-    self.odom_trans.transform.translation.z = 0.0
-    self.odom_trans.transform.rotation = \
-        euler_to_quaternion(0, 0, pi/2) # roll,pitch,yaw
+      now = self.get_clock().now()
+      self.joint_state.header.stamp = now.to_msg()
+      self.joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
+      self.joint_state.position = [self.theta1, self.theta2, self.theta3, self.theta4]
 
-    # send the joint state and transform
-    self.joint_pub.publish(self.joint_state)
-    self.broadcaster.sendTransform(self.odom_trans)
-  
-  
+      # update transform
+      
+      self.odom_trans.header.stamp = now.to_msg()
+      self.odom_trans.transform.translation.x = 0.0
+      self.odom_trans.transform.translation.y = 0.0
+      self.odom_trans.transform.translation.z = 0.0
+      self.odom_trans.transform.rotation = \
+          euler_to_quaternion(0, 0, pi/2) # roll,pitch,yaw
+
+      # send the joint state and transform
+      self.joint_pub.publish(self.joint_state)
+      self.broadcaster.sendTransform(self.odom_trans)
+
+    
 
 def euler_to_quaternion(roll, pitch, yaw):
   qx = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2)
@@ -95,11 +95,13 @@ def euler_to_quaternion(roll, pitch, yaw):
   return Quaternion(x=qx, y=qy, z=qz, w=qw)
 
 def main():
-  node = StatePublisher()
-  rclpy.spin(node)
-
-  node.destroy_node()
-  rclpy.shutdown()
+  try:
+    node = StatePublisher()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+  except KeyboardInterrupt:
+          pass
 
 if __name__ == '__main__':
   main()
