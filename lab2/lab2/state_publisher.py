@@ -19,7 +19,10 @@ class StatePublisher(Node):
     qos_profile = QoSProfile(depth=10)
     self.joint_pub = self.create_publisher(JointState, 'joint_states', qos_profile)
     self.broadcaster = TransformBroadcaster(self, qos=qos_profile)
+    self.delay = self.create_subscription(JointState,'joint_states', self.stop, 10)
+    self.delay
     self.nodeName = self.get_name()
+    self.sent = False
 
     self.get_logger().info("{0} started".format(self.nodeName))
     self.params = {}
@@ -61,29 +64,37 @@ class StatePublisher(Node):
     self.odom_trans.header.frame_id = 'base'
     self.odom_trans.child_frame_id = 'base_ext'
     self.joint_state = JointState()
+  
 
-    self.move()
+  
+    now = self.get_clock().now()
+    self.joint_state.header.stamp = now.to_msg()
+    self.joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
+    self.joint_state.position = [self.theta1, self.theta2, self.theta3, self.theta4]
 
+    # update transform
+    
+    self.odom_trans.header.stamp = now.to_msg()
+    self.odom_trans.transform.translation.x = 0.0
+    self.odom_trans.transform.translation.y = 0.0
+    self.odom_trans.transform.translation.z = 0.0
+    self.odom_trans.transform.rotation = \
+        euler_to_quaternion(0, 0, pi/2) # roll,pitch,yaw
+        
+    # send the transform
+    self.broadcaster.sendTransform(self.odom_trans)
+    
+    while not self.sent:
+      self.move()
 
   def move(self):
+
+    # send the joint state
+    self.joint_pub.publish(self.joint_state)
     
-      now = self.get_clock().now()
-      self.joint_state.header.stamp = now.to_msg()
-      self.joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand', 'hand-tool']
-      self.joint_state.position = [self.theta1, self.theta2, self.theta3, self.theta4]
 
-      # update transform
-      
-      self.odom_trans.header.stamp = now.to_msg()
-      self.odom_trans.transform.translation.x = 0.0
-      self.odom_trans.transform.translation.y = 0.0
-      self.odom_trans.transform.translation.z = 0.0
-      self.odom_trans.transform.rotation = \
-          euler_to_quaternion(0, 0, pi/2) # roll,pitch,yaw
-
-      # send the joint state and transform
-      self.joint_pub.publish(self.joint_state)
-      self.broadcaster.sendTransform(self.odom_trans)
+  def stop(self, msg):
+    self.sent = True
 
     
 
@@ -97,11 +108,14 @@ def euler_to_quaternion(roll, pitch, yaw):
 def main():
   try:
     node = StatePublisher()
-    rclpy.spin(node)
+    
+    rclpy.spin_once(node)
+    
+
     node.destroy_node()
     rclpy.shutdown()
   except KeyboardInterrupt:
-          pass
+    pass
 
 if __name__ == '__main__':
   main()
