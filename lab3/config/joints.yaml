@@ -1,13 +1,6 @@
-fixed_joints: False
-
-el1-el2:
-  d: 0.5
-  t: 0.0
-
-el2-el3:
-  d: 0.0
-  t: 0.0
-
-el3-tool:
-  d: 0.0
-  t: 0.0
+# DH TABLE
+# base: {a_i_minus_1: 0, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }
+base_ext: {a_i_minus_1: 0, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }
+arm: {a_i_minus_1: 1, d_i: 0, alpha_i_minus_1: -1.5708, theta_i: 0 }
+hand: {a_i_minus_1: 0.5, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }
+tool: {a_i_minus_1: 0, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }

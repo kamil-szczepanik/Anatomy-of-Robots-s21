@@ -70,7 +70,7 @@
   </xacro:m_link_cylinder>
 
   <xacro:m_joint name="hand-tool" 
-  type="revolute"
+  type="fixed"
   axis_xyz="0 0 1"
   origin_rpy="0 0 0" 
   origin_xyz="${a3} 0 ${d3}"
@@ -79,12 +79,18 @@
   limit_lower="0" limit_upper="0">
   </xacro:m_joint>
 
-  <xacro:m_gun name="tool"
+  <xacro:m_tool name="tool"
+    origin_xyz="0 0 0"
+    origin_rpy="0 0 0">
+  </xacro:m_tool>
+
+
+  <!-- <xacro:m_gun name="tool"
     origin_xyz="0 0 0"
     origin_rpy="0 0 0"
     scale="0.001 0.001 0.001">
   </xacro:m_gun>
-
+ -->
 
               
   <!-- END - Robot description -->
