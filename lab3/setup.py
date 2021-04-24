@@ -28,6 +28,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'kdl = lab3.kdl:main',
+            'non_kdl = lab3.non_kdl:main',
+            'xyz_pry = lab3.xyz_rpy:main'
         ],
     },
 )
