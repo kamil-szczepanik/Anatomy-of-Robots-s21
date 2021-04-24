@@ -1,0 +1,77 @@
+<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find lab3)/materials.urdf.xacro" />
+
+    <xacro:macro name="m_link_cylinder" params="name origin_xyz origin_rpy radius length material">
+        <link name="${name}">
+          <inertial>
+            <mass value="10" />
+            <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="100" />
+          </inertial>
+          <collision>
+            <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+            <geometry>
+              <cylinder radius="${radius}" length="${length}" />
+            </geometry>
+          </collision>
+          <visual>
+            <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+            <geometry>
+              <cylinder radius="${radius}" length="${length}" />
+            </geometry>
+            <material name="${material}" />
+          </visual>
+        </link>
+      </xacro:macro>
+    
+  <xacro:macro name="m_joint" params="name type axis_xyz origin_rpy origin_xyz parent child limit_lower limit_upper">
+    <joint name="${name}" type="${type}">
+      <axis xyz="${axis_xyz}" />
+      <limit effort="10" lower="${limit_lower}" upper="${limit_upper}" velocity="10" />
+      <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+      <parent link="${parent}" />
+      <child link="${child}" />
+    </joint>
+  </xacro:macro>
+
+  <xacro:macro name="m_link_box" params="name origin_xyz origin_rpy size material">
+    <link name="${name}">
+      <inertial>
+        <mass value="10" />
+        <inertia ixx="100" ixy="0" ixz="0" iyy="100" iyz="0" izz="100" />
+      </inertial>
+      <collision>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <box size="${size}" />
+        </geometry>
+      </collision>
+      <visual>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <box size="${size}" />
+        </geometry>
+        <material name="${material}" />
+      </visual>
+    </link>
+  </xacro:macro>
+
+
+  <xacro:macro name="m_gun" params="name origin_xyz origin_rpy scale">
+    <link name="${name}">
+      <!-- <collision>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <box size="${size}" />
+        </geometry>
+      </collision> -->
+      <visual>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <mesh filename = "package://lab3/gatling.stl" scale="${scale}"/>
+        </geometry>
+      </visual>
+    </link>
+  </xacro:macro>
+
+</robot>
