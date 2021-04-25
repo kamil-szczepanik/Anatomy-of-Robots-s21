@@ -57,5 +57,5 @@ def generate_launch_description():
             name='bogson_rviz2',
             output='screen',
             parameters=[{'use_sim_time': use_sim_time,}],
-            arguments=['-d', os.path.join(get_package_share_directory('lab3'), 'robot.rviz')]),
+            arguments=['-d', os.path.join(get_package_share_directory('lab3'), 'robot_ready.rviz')]),
   ])
