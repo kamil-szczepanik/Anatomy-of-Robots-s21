@@ -10,7 +10,7 @@
   <xacro:m_link_box name="base"
     origin_rpy="0 0 0"
     origin_xyz="0 0 0"
-    size="1 1 0.1" 
+    size="1 1 ${2*d0}" 
     material="blue">
   </xacro:m_link_box>
               
