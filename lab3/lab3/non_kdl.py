@@ -26,14 +26,10 @@ class NONKDL_DKIN(Node):
 
     def listener_callback(self, msg):
 
-
         params = read_params()
 
         T = np.eye(4)
-        T[2][3] = 0.05
-        print(msg.position)
 
-        
         for i, link in enumerate(params.keys()):
             
             d = params[link]['d']
@@ -79,11 +75,6 @@ class NONKDL_DKIN(Node):
 
             T_curr = Rotx@Transx@Rotz@Transz
             T = T @ T_curr
-
-        # T = T @ np.array([[1, 0, 0, links['tool']['l']+links['el3']['r']],
-        #                   [0, 1, 0, 0],
-        #                   [0, 0, 1, 0],
-        #                   [0, 0, 0, 1]])
 
         xyz = [T[0][3], T[1][3], T[2][3]]
         print(xyz)
