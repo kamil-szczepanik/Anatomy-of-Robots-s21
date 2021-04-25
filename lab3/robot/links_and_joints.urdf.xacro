@@ -56,7 +56,6 @@
     </link>
   </xacro:macro>
 
-
   <xacro:macro name="m_gun" params="name origin_xyz origin_rpy scale">
     <link name="${name}">
       <!-- <collision>
@@ -90,5 +89,4 @@
       </visual>
     </link>
   </xacro:macro>
-
 </robot>

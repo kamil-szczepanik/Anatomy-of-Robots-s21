@@ -1,6 +1,23 @@
-a1: 0.0
-d1: 0.0
-a2: 1.0
-d2: 0.0
-a3: 0.5
-d3: 0.0
+base:
+  a: 0.0
+  alpha: 0.0
+  d: 0.05
+  theta: 0.0
+
+base_ext:
+  a: 0.0
+  alpha: -1.57
+  d: 0.0
+  theta: 0.0
+
+arm:
+  a: 1.0
+  alpha: 0.0
+  d: 0.0
+  theta: 0.0
+
+hand:
+  a: 0.5
+  alpha: 0.0
+  d: 0.0
+  theta: 0.0

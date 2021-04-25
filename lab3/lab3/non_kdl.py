@@ -26,37 +26,29 @@ class NONKDL_DKIN(Node):
 
     def listener_callback(self, msg):
 
-
-        dh_table = read_dh_table()
-        # dhv = read_joints()
-        # dhv.pop('fixed_joints')
-
-        # links = read_links()
+        params = read_params()
 
         T = np.eye(4)
-        T[2][3] = 0.05
-        print(msg.position)
 
-        
-        for i, link in enumerate(dh_table.keys()):
+        for i, link in enumerate(params.keys()):
             
-            d = dh_table[link]['d_i']
-            theta = dh_table[link]['theta_i']
-            a = dh_table[link]['a_i_minus_1']
-            alpha = dh_table[link]['alpha_i_minus_1']
+            d = params[link]['d']
+            theta = params[link]['theta']
+            a = params[link]['a']
+            alpha = params[link]['alpha']
 
             if i ==1:
-                d = dh_table['base_ext']['d_i']
-                a = dh_table['base_ext']['a_i_minus_1']
+                d = params['base_ext']['d']
+                a = params['base_ext']['a']
             if i ==2:
-                d = dh_table['arm']['d_i']
-                a = dh_table['arm']['a_i_minus_1']
+                d = params['arm']['d']
+                a = params['arm']['a']
             
             if i==3:
-                d = dh_table['hand']['d_i']
-                a = dh_table['hand']['a_i_minus_1']
+                d = params['hand']['d']
+                a = params['hand']['a']
             
-            if len(dh_table.keys())!=i+1:
+            if len(params.keys())!=i+1:
                 theta = msg.position[i]
             else:
                 theta=0
@@ -84,11 +76,14 @@ class NONKDL_DKIN(Node):
             T_curr = Rotx@Transx@Rotz@Transz
             T = T @ T_curr
 
+<<<<<<< HEAD
         # T = T @ np.array([[1, 0, 0, links['tool']['l']+links['el3']['r']],
         #                   [0, 1, 0, 0],
         #                   [0, 0, 1, 0],
         #                   [0, 0, 0, 1]])
 
+=======
+>>>>>>> refaktoryzacja
         xyz = [T[0][3], T[1][3], T[2][3]]
         print(xyz)
 
@@ -114,25 +109,11 @@ class NONKDL_DKIN(Node):
 
         pose_publisher.publish(pose)
 
-# def read_joints():
 
-#     with open(os.path.join(get_package_share_directory('lab3'), 'joints.yaml'), 'r') as file:
-#         dhv = yaml.load(file, Loader=yaml.FullLoader)
-
-#     return dhv
-
-# def read_links():
-
-#     with open(os.path.join(get_package_share_directory('lab3'), 'links.yaml'), 'r') as file:
-#         links = yaml.load(file, Loader=yaml.FullLoader)
-
-#     return links
-
-def read_dh_table():
-
-    with open(os.path.join(get_package_share_directory('lab3'), 'joints.yaml'), 'r') as file:
+def read_params():
+    with open(os.path.join(get_package_share_directory('lab3'), 'params.yaml'), 'r') as file:
         params = yaml.load(file, Loader=yaml.FullLoader)
-    # print(params)
+
     return params
 
 def main(args=None):
