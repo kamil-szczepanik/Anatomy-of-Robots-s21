@@ -1,6 +1,0 @@
-# DH TABLE
-# base: {a_i_minus_1: 0, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }
-base_ext: {a_i_minus_1: 0, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }
-arm: {a_i_minus_1: 1, d_i: 0, alpha_i_minus_1: -1.5708, theta_i: 0 }
-hand: {a_i_minus_1: 0.5, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }
-tool: {a_i_minus_1: 0, d_i: 0, alpha_i_minus_1: 0, theta_i: 0 }

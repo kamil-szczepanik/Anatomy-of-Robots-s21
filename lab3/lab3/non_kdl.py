@@ -76,14 +76,6 @@ class NONKDL_DKIN(Node):
             T_curr = Rotx@Transx@Rotz@Transz
             T = T @ T_curr
 
-<<<<<<< HEAD
-        # T = T @ np.array([[1, 0, 0, links['tool']['l']+links['el3']['r']],
-        #                   [0, 1, 0, 0],
-        #                   [0, 0, 1, 0],
-        #                   [0, 0, 0, 1]])
-
-=======
->>>>>>> refaktoryzacja
         xyz = [T[0][3], T[1][3], T[2][3]]
         print(xyz)
 
