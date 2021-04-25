@@ -26,38 +26,37 @@ class NONKDL_DKIN(Node):
 
     def listener_callback(self, msg):
 
-        dhv = read_joints()
-        dhv.pop('fixed_joints')
 
-        links = read_links()
+        params = read_params()
 
         T = np.eye(4)
-        T[2][3] = 0.1
+        T[2][3] = 0.05
+        print(msg.position)
 
-        for i, joint in enumerate(dhv.keys()):
+        
+        for i, link in enumerate(params.keys()):
+            
+            d = params[link]['d']
+            theta = params[link]['theta']
+            a = params[link]['a']
+            alpha = params[link]['alpha']
 
-            d = dhv[joint]['d']
-            theta = dhv[joint]['t']
-
-            if i == 0:
-                a = links['el1']['a']
-                alpha = links['el1']['alpha']
-
-                d += msg.position[i]
-                d += links['el1']['l']
-            if i == 1:
-                a = links['el2']['a']
-                alpha = links['el2']['alpha']
-
+            if i ==1:
+                d = params['base_ext']['d']
+                a = params['base_ext']['a']
+            if i ==2:
+                d = params['arm']['d']
+                a = params['arm']['a']
+            
+            if i==3:
+                d = params['hand']['d']
+                a = params['hand']['a']
+            
+            if len(params.keys())!=i+1:
                 theta = msg.position[i]
-                d += links['el2']['l']
-            if i == 2:
-                a = links['el3']['a']
-                alpha = links['el3']['alpha']
-
-                theta = msg.position[i]
-
-
+            else:
+                theta=0
+            
             Rotx = np.array([[1, 0, 0, 0],
                              [0, cos(alpha), -sin(alpha), 0],
                              [0, sin(alpha), cos(alpha), 0],
@@ -81,10 +80,10 @@ class NONKDL_DKIN(Node):
             T_curr = Rotx@Transx@Rotz@Transz
             T = T @ T_curr
 
-        T = T @ np.array([[1, 0, 0, links['tool']['l']+links['el3']['r']],
-                          [0, 1, 0, 0],
-                          [0, 0, 1, 0],
-                          [0, 0, 0, 1]])
+        # T = T @ np.array([[1, 0, 0, links['tool']['l']+links['el3']['r']],
+        #                   [0, 1, 0, 0],
+        #                   [0, 0, 1, 0],
+        #                   [0, 0, 0, 1]])
 
         xyz = [T[0][3], T[1][3], T[2][3]]
         print(xyz)
@@ -111,19 +110,12 @@ class NONKDL_DKIN(Node):
 
         pose_publisher.publish(pose)
 
-def read_joints():
 
-    with open(os.path.join(get_package_share_directory('lab3'), 'joints.yaml'), 'r') as file:
-        dhv = yaml.load(file, Loader=yaml.FullLoader)
+def read_params():
+    with open(os.path.join(get_package_share_directory('lab3'), 'params.yaml'), 'r') as file:
+        params = yaml.load(file, Loader=yaml.FullLoader)
 
-    return dhv
-
-def read_links():
-
-    with open(os.path.join(get_package_share_directory('lab3'), 'links.yaml'), 'r') as file:
-        links = yaml.load(file, Loader=yaml.FullLoader)
-
-    return links
+    return params
 
 def main(args=None):
     rclpy.init(args=args)

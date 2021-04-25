@@ -56,7 +56,6 @@
     </link>
   </xacro:macro>
 
-
   <xacro:macro name="m_gun" params="name origin_xyz origin_rpy scale">
     <link name="${name}">
       <!-- <collision>
@@ -74,4 +73,20 @@
     </link>
   </xacro:macro>
 
+  <xacro:macro name="m_tool" params="name origin_xyz origin_rpy">
+    <link name="${name}">
+      <!-- <collision>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <box size="${size}" />
+        </geometry>
+      </collision> -->
+      <visual>
+        <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
+        <geometry>
+          <cylinder radius="0.01" length="0.05" />
+        </geometry>
+      </visual>
+    </link>
+  </xacro:macro>
 </robot>
