@@ -7,9 +7,9 @@ from launch_ros.actions import Node
 
 def get_package_file(package, file_path):
     """Get the location of a file installed in an ament package"""
-    package = 'lab3'
+    package = 'lab4'
     package_path = get_package_share_directory(package)
-    absolute_file_path = os.path.join(get_package_share_directory('lab3'), file_path)
+    absolute_file_path = os.path.join(get_package_share_directory('lab4'), file_path)
     return absolute_file_path
 
 def run_xacro(xacro_file):
@@ -23,16 +23,16 @@ def run_xacro(xacro_file):
 def generate_launch_description():
 
     param_file_name = 'params.yaml'
-    param_file = get_package_file('lab3', param_file_name)
+    param_file = get_package_file('lab4', param_file_name)
 
     pos_param_file_name = 'pos_params.yaml'
-    pos_param_file = get_package_file('lab3', pos_param_file_name)
+    pos_param_file = get_package_file('lab4', pos_param_file_name)
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     xacro_file_name = 'robot.urdf.xacro'
     print("urdf_file_name : {}".format(xacro_file_name))
     
-    xacro_file = get_package_file('lab3', xacro_file_name)
+    xacro_file = get_package_file('lab4', xacro_file_name)
     urdf_file = run_xacro(xacro_file)
 
     return LaunchDescription([
