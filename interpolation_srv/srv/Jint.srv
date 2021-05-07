@@ -1,0 +1,13 @@
+# desired positions of joints
+float64 joint1
+float64 joint2
+float64 joint3
+
+# type of interpolation
+string interpolation_type
+
+# movement time
+float64 time
+---
+# service response
+string response

@@ -1,0 +1,99 @@
+<robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+  <!-- BGN - Include -->
+  <xacro:include filename="$(find lab3)/load_params.urdf.xacro" />
+  <xacro:include filename="$(find lab3)/links_and_joints.urdf.xacro" />
+  <!-- END - Include -->
+  
+
+  <!-- BGN - Robot description -->
+  <xacro:m_link_box name="base"
+    origin_rpy="0 0 0"
+    origin_xyz="0 0 0"
+    size="1 1 ${2*d0}" 
+    material="blue">
+  </xacro:m_link_box>
+              
+  <xacro:m_joint name="base-base_ext" 
+    type="revolute"
+    axis_xyz="0 0 1"
+    origin_rpy="0 0 0" 
+    origin_xyz="0 0 ${d0}"
+    parent="base" 
+    child="base_ext"
+    limit_lower="-3.14" limit_upper="3.14">
+  </xacro:m_joint>
+           
+  <xacro:m_link_cylinder name="base_ext"
+    origin_xyz="${a1/2} 0 ${d1/2}"
+    origin_rpy="0 0 0" 
+    radius="0.05"
+    length="${a1}"
+    material="white">
+  </xacro:m_link_cylinder>
+  
+
+  <xacro:m_joint name="base_ext-arm" 
+    type="revolute"
+    axis_xyz="0 0 1"
+    origin_rpy="${-pi/2} 0 0" 
+    origin_xyz="0 0 0"
+    parent="base_ext" 
+    child="arm"
+    limit_lower="-3.14" limit_upper="0.01">
+  </xacro:m_joint>
+           
+  <xacro:m_link_cylinder name="arm"
+    origin_xyz="${a2/2} 0 ${d2/2}"  
+    origin_rpy="0 ${pi/2} 0" 
+    radius="0.05"
+    length="${a2}"
+    material="white">
+  </xacro:m_link_cylinder>
+
+  <xacro:m_joint name="arm-hand" 
+    type="revolute"
+    axis_xyz="0 0 1"
+    origin_rpy="0 0 0" 
+    origin_xyz="${a2} 0 0"
+    parent="arm" 
+    child="hand"
+    limit_lower="-2.90" limit_upper="2.90">
+  </xacro:m_joint>
+           
+  <xacro:m_link_cylinder name="hand"
+    origin_xyz="${a3/2} 0 ${d3/2}"  
+    origin_rpy="0 ${pi/2} 0" 
+    radius="0.05"
+    length="${a3}"
+    material="white">
+  </xacro:m_link_cylinder>
+
+  <xacro:m_joint name="hand-tool" 
+  type="fixed"
+  axis_xyz="0 0 1"
+  origin_rpy="0 0 0" 
+  origin_xyz="${a3} 0 ${d3}"
+  parent="hand" 
+  child="tool"
+  limit_lower="0" limit_upper="0">
+  </xacro:m_joint>
+
+  <xacro:m_tool name="tool"
+    origin_xyz="0 0 0"
+    origin_rpy="0 -1.57 0">
+  </xacro:m_tool>
+
+
+  <!-- <xacro:m_gun name="tool"
+    origin_xyz="0 0 0"
+    origin_rpy="0 0 0"
+    scale="0.001 0.001 0.001">
+  </xacro:m_gun>
+ -->
+
+              
+  <!-- END - Robot description -->
+    
+
+</robot>
