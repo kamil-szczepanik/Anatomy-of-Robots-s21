@@ -10,22 +10,6 @@ class MinimalService(Node):
     def __init__(self):
         super().__init__('minimal_service')
         self.srv = self.create_service(Jint, 'jint_control_srv', self.jint_control_srv_callback)
-
-        self.declare_parameters(
-                namespace='',
-                parameters=[
-                    ('position1', 0.0),
-                    ('position2', 0.0),
-                    ('position3', 0.0),
-                ])
-        self.position1 = self.get_parameter('position1').get_parameter_value().double_value
-        self.position2 = self.get_parameter('position2').get_parameter_value().double_value
-        self.position3 = self.get_parameter('position3').get_parameter_value().double_value
-    
-        self.movement_time = 0.0
-        self.start_position1 = self.position1
-        self.start_position2 = self.position2
-        self.start_position3 = self.position3
    
     def jint_control_srv_callback(self, request, response):
 
@@ -39,6 +23,14 @@ class MinimalService(Node):
                                                                 request.position3, 
                                                                 request.time, 
                                                                 request.interpolation))
+
+        if request.interpolation_type != "linear" and request.interpolation_type != "spline":
+            response.response = "Cannot perform linearization - wrong type of linearization"
+            return response
+        
+        step_time = 0.1
+        movement_time = response.movement_time
+        
         
     def linear_interpolation(q0, qf, tf, movement_time):
         return q0 + ((qf-q0)/tf)*movement_time
