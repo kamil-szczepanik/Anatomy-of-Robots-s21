@@ -20,7 +20,7 @@ class MinimalClientAsync(Node):
     def send_request(self):
         try:
             self.request.joint1 = float(sys.argv[1])
-            self.request.joint2= float(sys.argv[2])
+            self.request.joint2 = float(sys.argv[2])
             self.request.joint3 = float(sys.argv[3])
             self.request.time = float(sys.argv[4])
             self.request.interpolation_type = (sys.argv[5])
