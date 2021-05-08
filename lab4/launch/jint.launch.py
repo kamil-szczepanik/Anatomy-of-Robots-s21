@@ -54,4 +54,10 @@ def generate_launch_description():
             output='screen',
             parameters=[{'use_sim_time': use_sim_time,}],
             arguments=['-d', os.path.join(get_package_share_directory('lab4'), 'robot.rviz')]),
+        Node(
+            package='lab4',
+            executable='jint_srv',
+            name='jint_srv',
+            output='screen',
+        )
   ])
