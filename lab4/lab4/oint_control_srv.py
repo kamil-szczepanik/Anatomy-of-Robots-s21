@@ -84,7 +84,7 @@ class MinimalService(Node):
             self.orient_pitch += pitch_increment
             self.orient_yaw += yaw_increment
 
-            self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_x), z=float(self.pos_x))
+            self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_y), z=float(self.pos_z))
 
             self.pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
             
@@ -136,7 +136,7 @@ class MinimalService(Node):
             self.orient_pitch = a0_pitch + a1_pitch*(i*self.rate) + a2_pitch*(i*self.rate)**2 + a3_pitch*(i*self.rate)**3
             self.orient_yaw = a0_yaw + a1_yaw*(i*self.rate) + a2_yaw*(i*self.rate)**2 + a3_yaw*(i*self.rate)**3
 
-            self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_x), z=float(self.pos_x))
+            self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_y), z=float(self.pos_z))
 
             self.pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
 
@@ -197,11 +197,6 @@ class MinimalService(Node):
         self.path_point = self.make_point()
         self.marker.points.append(self.path_point)
         self.marker_pub.publish(self.marker)
-
-        print(self.marker.points)
-
-        self.marker_pub.publish(self.marker)
-
 
 def main(args=None):
     rclpy.init(args=args)
