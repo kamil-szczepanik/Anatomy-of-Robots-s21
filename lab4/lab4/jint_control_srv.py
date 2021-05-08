@@ -1,11 +1,17 @@
 import rclpy
 from rclpy.node import Node
-
 from interpolation_srv.srv import Jint
 from sensor_msgs.msg import JointState
 from rclpy.qos import QoSProfile
-import math
 import time
+from visualization_msgs.msg import Marker
+from visualization_msgs.msg import MarkerArray
+import yaml
+from ament_index_python.packages import get_package_share_directory
+import os
+from math import sin, cos, pi
+import numpy as np
+import mathutils
 
 class MinimalService(Node):
 
@@ -14,6 +20,8 @@ class MinimalService(Node):
         self.srv = self.create_service(Jint, 'jint_control_srv', self.jint_control_srv_callback)
         qos_profile = QoSProfile(depth=10)
         self.publisher = self.create_publisher(JointState, "/joint_states", qos_profile)
+        self.marker_pub = self.create_publisher(MarkerArray, '/marker', qos_profile)
+        self.robot_params = read_params()
 
         self.declare_parameters(
                 namespace='',
@@ -27,20 +35,20 @@ class MinimalService(Node):
         self.position3 = self.get_parameter('position3').get_parameter_value().double_value
     
         self.rate = 0.1
+   
+    def jint_control_srv_callback(self, request, response):
+        self.marker_init()
+
         self.start_position1 = self.position1
         self.start_position2 = self.position2
         self.start_position3 = self.position3
-   
-    def jint_control_srv_callback(self, request, response):
 
-
-
-        self.get_logger().info('Incoming request\n'+
-                                f' - position1: {request.joint1}\n' +
-                                f' - position2: {request.joint2}\n'+
-                                f' - position3: {request.joint3}\n'+
-                                f' -- time: {request.time}\n'+
-                                f' --- interpolation type: {request.interpolation_type}')
+        self.get_logger().info('Nadchodzące żądanie\n'+
+                                f' - pozycja 1: {request.joint1}\n' +
+                                f' - pozycja 2: {request.joint2}\n'+
+                                f' - pozycja 3: {request.joint3}\n'+
+                                f' -- czas: {request.time}\n'+
+                                f' --- typ interpolacji: {request.interpolation_type}')
 
         try:
             self.request_check(request)
@@ -74,10 +82,11 @@ class MinimalService(Node):
 
             joint_state.position = [float(self.position1),float(self.position2),float(self.position3)]
             self.publisher.publish(joint_state)
+
+            self.marker_show()
+
             time.sleep(self.rate)
         
-
-
     def spline_interpolation(self, req_pos1, req_pos2, req_pos3, int_time):
         joint_state = JointState()
         moves = (int)(int_time/self.rate)
@@ -108,15 +117,18 @@ class MinimalService(Node):
 
             joint_state.position = [float(self.position1),float(self.position2),float(self.position3)]
             self.publisher.publish(joint_state)
+
+            self.marker_show()
+
             time.sleep(self.rate)
 
     def request_check(self, request):
-        if(request.joint1 < 0 or request.joint1 > 2*math.pi):
+        if(request.joint1 < 0 or request.joint1 > 2*pi):
             err = 'Niepoprawna wartośc dla stawu 1'
             self.get_logger().error(err) 
             raise ValueError(err)
 
-        if(request.joint2 > 0 or request.joint2 < -math.pi):
+        if(request.joint2 > 0 or request.joint2 < -pi):
             err = 'Niepoprawna wartośc dla stawu 2'
             self.get_logger().error(err)               
             raise ValueError(err)
@@ -136,6 +148,113 @@ class MinimalService(Node):
             self.get_logger().error(err)
             raise ValueError(err)
         
+    def marker_init(self):
+        self.markerArray = MarkerArray()
+
+        self.marker = Marker()
+        self.marker.header.frame_id = "base"
+
+        self.marker.id = 0
+        self.marker.action = Marker.DELETEALL
+        self.markerArray.markers.append(self.marker)
+        self.marker_pub.publish(self.markerArray)
+        
+        self.marker.type = Marker.SPHERE
+        self.marker.action = Marker.ADD
+        self.marker.scale.x = 0.05
+        self.marker.scale.y = 0.05
+        self.marker.scale.z = 0.05
+        self.marker.color.a = 0.5
+        self.marker.color.r = 1.0
+        self.marker.color.g = 1.0
+        self.marker.color.b = 1.0
+        self.marker.pose.orientation.w = 1.0
+        self.marker.pose.orientation.x = 1.0
+        self.marker.pose.orientation.y = 1.0
+        self.marker.pose.orientation.z = 1.0
+    
+    def marker_show(self):
+        xyz = self.calc_position()
+        self.marker.pose.position.x = xyz[0]
+        self.marker.pose.position.y = xyz[1]
+        self.marker.pose.position.z = xyz[2]
+        self.markerArray.markers.append(self.marker)
+
+        id = 0
+        for m in self.markerArray.markers:
+            m.id = id
+            id += 1
+
+        self.marker_pub.publish(self.markerArray)
+
+    def calc_position(self):
+
+        params = self.robot_params
+        T = np.eye(4)
+
+        for i, link in enumerate(params.keys()):
+            
+            d = params[link]['d']
+            theta = params[link]['theta']
+            a = params[link]['a']
+            alpha = params[link]['alpha']
+
+            if i ==1:
+                d = params['base_ext']['d']
+                a = params['base_ext']['a']
+
+            if i ==2:
+                d = params['arm']['d']
+                a = params['arm']['a']
+            
+            if i==3:
+                d = params['hand']['d']
+                a = params['hand']['a']
+            
+            if len(params.keys()) != i+1:
+                if i == 1:
+                    theta = self.position1
+                if i == 2:
+                    theta = self.position2
+                if i == 3:
+                    theta = self.position3
+            else:
+                theta = 0
+            
+            Rotx = np.array([[1, 0, 0, 0],
+                                [0, cos(alpha), -sin(alpha), 0],
+                                [0, sin(alpha), cos(alpha), 0],
+                                [0, 0, 0, 1]])
+
+            Transx = np.array([[1, 0, 0, a],
+                                [0, 1, 0, 0],
+                                [0, 0, 1, 0],
+                                [0, 0, 0, 1]])
+
+            Rotz = np.array([[cos(theta), -sin(theta), 0, 0],
+                                [sin(theta), cos(theta), 0, 0],
+                                [0, 0, 1, 0],
+                                [0, 0, 0, 1]])
+
+            Transz = np.array([[1, 0, 0, 0],
+                                [0, 1, 0, 0],
+                                [0, 0, 1, d],
+                                [0, 0, 0, 1]])
+
+            T_curr = Rotx@Transx@Rotz@Transz
+            T = T @ T_curr
+
+        xyz = [T[0][3], T[1][3], T[2][3]]
+
+        return xyz
+
+
+def read_params():
+    with open(os.path.join(get_package_share_directory('lab4'), 'params.yaml'), 'r') as file:
+        params = yaml.load(file, Loader=yaml.FullLoader)
+
+    return params
+
 
 def main():
     rclpy.init()
