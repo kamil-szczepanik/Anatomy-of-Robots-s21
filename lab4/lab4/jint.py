@@ -5,9 +5,6 @@ from interpolation_srv.srv import Jint
 
 from sensor_msgs.msg import JointState
 
-
-# Service - dwa parametry: czas w jakim robot ma się przemieścić i punkt w ktorym ma byc końcowka
-
 class MinimalClientAsync(Node):
 
     def __init__(self):
