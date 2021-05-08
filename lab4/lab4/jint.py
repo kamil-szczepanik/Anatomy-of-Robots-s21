@@ -8,7 +8,7 @@ from sensor_msgs.msg import JointState
 
 # Service - dwa parametry: czas w jakim robot ma się przemieścić i punkt w ktorym ma byc końcowka
 
-class JintClient(Node):
+class MinimalClientAsync(Node):
 
     def __init__(self):
         super().__init__('minimal_client_async')
