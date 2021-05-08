@@ -2,9 +2,9 @@ import rclpy
 from rclpy.node import Node
 
 from interpolation_srv.srv import Jint
-
-from geometry_msgs.msg import JointState
+from sensor_msgs.msg import JointState
 from rclpy.qos import QoSProfile
+import time
 
 class MinimalService(Node):
 
@@ -33,36 +33,39 @@ class MinimalService(Node):
     def jint_control_srv_callback(self, request, response):
 
         self.get_logger().info('Incoming request\n'+
-                                ' - position1: %d\n' +
-                                ' - position2: %d\n'+
-                                ' - position3: %d\n'+
-                                ' -- time: %d\n'+
-                                ' --- interpolation type:%d' % (request.position1, 
-                                                                request.position2, 
-                                                                request.position3, 
-                                                                request.time, 
-                                                                request.interpolation))
+                                f' - position1: {request.joint1}\n' +
+                                f' - position2: {request.joint2}\n'+
+                                f' - position3: {request.joint3}\n'+
+                                f' -- time: {request.time}\n'+
+                                f' --- interpolation type: {request.interpolation_type}')
 
         joint_state = JointState()
-        moves = (int)(time/self.rate)
+        moves = (int)(request.time/self.rate)
+        self.start_position1 = self.position1
+        self.start_position2 = self.position2
+        self.start_position3 = self.position3
 
         for i in range(moves):
             now = self.get_clock().now()
-            self.joint_state.header.stamp = now.to_msg()
-            self.joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
+            joint_state.header.stamp = now.to_msg()
+            joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
 
-            if request.interpolation == 'Linear':
-                self.linear_interpolation(request.position1, request.position2, request.position3, moves)
-            elif request.interpolation == "Spline":
+            if request.interpolation_type == 'Linear':
+                self.linear_interpolation(request.joint1, request.joint2, request.joint3, moves)
+            elif request.interpolation_type == "Spline":
                 self.spline_interpolation()
 
-            joint_state.position = [float(self.position1),float(self.position3),float(self.position3)]
+            joint_state.position = [float(self.position1),float(self.position2),float(self.position3)]
             self.publisher.publish(joint_state)
+            time.sleep(self.rate)
+
+        response.response = "Interpolacja zakończona"
+        return response
         
     def linear_interpolation(self, req_pos1, req_pos2, req_pos3, moves):
-        self.position1 += (req_pos1 - self.position1)/moves
-        self.position2 += (req_pos2 - self.position2)/moves
-        self.position3 += (req_pos3 - self.position3)/moves
+        self.position1 += (req_pos1 - self.start_position1)/moves
+        self.position2 += (req_pos2 - self.start_position2)/moves
+        self.position3 += (req_pos3 - self.start_position3)/moves
 
 
     def spline_interpolation(self):
