@@ -47,11 +47,11 @@ def generate_launch_description():
             output='screen',
             parameters=[{'use_sim_time': use_sim_time}],
             arguments=[urdf_file]),
-        # Node(
-        #     package='rviz2',
-        #     executable='rviz2',
-        #     name='bogson_rviz2',
-        #     output='screen',
-        #     parameters=[{'use_sim_time': use_sim_time,}],
-        #     arguments=['-d', os.path.join(get_package_share_directory('lab4'), 'robot_ready.rviz')]),
+        Node(
+            package='rviz2',
+            executable='rviz2',
+            name='bogson_rviz2',
+            output='screen',
+            parameters=[{'use_sim_time': use_sim_time,}],
+            arguments=['-d', os.path.join(get_package_share_directory('lab4'), 'robot.rviz')]),
   ])

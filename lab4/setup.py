@@ -28,6 +28,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'jint_srv = lab4.jint_control_srv:main',
+            'jint_cli = lab4.jint:main'
         ],
     },
 )
