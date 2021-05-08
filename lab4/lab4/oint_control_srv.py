@@ -2,11 +2,9 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 
-from geometry_msgs.msg import PoseStamped
-from geometry_msgs.msg import Quaternion
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import PoseStamped, Pose, Quaternion, Point
 
-
+from visualization_msgs.msg import Marker, MarkerArray
 
 from math import sin, cos
 import time
@@ -20,6 +18,7 @@ class MinimalService(Node):
         self.srv = self.create_service(Oint, 'oint_control_srv', self.oint_control_srv_callback)
         qos_profile = QoSProfile(depth=10)
         self.publisher = self.create_publisher(PoseStamped, "/position", qos_profile)
+        self.marker_pub = self.create_publisher(Marker, "/path_marker", qos_profile)
 
         self.rate = 0.1
         # initial position and orientation
@@ -45,6 +44,9 @@ class MinimalService(Node):
 
         try:
             self.request_check(request)
+            self.pose_stamped = PoseStamped()
+            self.pose_stamped.header.frame_id = "odom"
+            self.marker_init()
 
             if request.interpolation_type == "Linear":
                 self.linear_interpolation(request.x, request.y, request.z, request.roll, request.pitch, request.yaw, request.time)
@@ -59,9 +61,8 @@ class MinimalService(Node):
             return response
         
     def linear_interpolation(self, req_x, req_y, req_z, req_roll, req_pitch, req_yaw, int_time):
-        pose_stamped = PoseStamped()
-        pose_stamped.header.frame_id = "odom"
-        moves = (int)(int_time/self.rate)
+
+        moves = (int)(int_time/self.rate)    
 
         pos_x_increment = (req_x - self.pos_x)/moves
         pos_y_increment = (req_y - self.pos_y)/moves
@@ -73,7 +74,7 @@ class MinimalService(Node):
 
         for i in range(moves):
             now = self.get_clock().now()
-            pose_stamped.header.stamp = now.to_msg()
+            self.pose_stamped.header.stamp = now.to_msg()
             
             self.pos_x += pos_x_increment
             self.pos_y += pos_y_increment
@@ -83,16 +84,18 @@ class MinimalService(Node):
             self.orient_pitch += pitch_increment
             self.orient_yaw += yaw_increment
 
-            pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_x), z=float(self.pos_x))
+            self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_x), z=float(self.pos_x))
 
-            pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
+            self.pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
             
-            self.publisher.publish(pose_stamped)
+            self.publisher.publish(self.pose_stamped)
+
+            self.marker_show()
+
             time.sleep(self.rate)
 
     def spline_interpolation(self, req_x, req_y, req_z, req_roll, req_pitch, req_yaw, int_time):
-        pose_stamped = PoseStamped()
-        pose_stamped.header.frame_id = "odom"
+        
         moves = (int)(int_time/self.rate)
 
         a0_x = self.pos_x
@@ -123,7 +126,7 @@ class MinimalService(Node):
 
         for i in range(moves):
             now = self.get_clock().now()
-            pose_stamped.header.stamp = now.to_msg()
+            self.pose_stamped.header.stamp = now.to_msg()
             
             self.pos_x = a0_x + a1_x*(i*self.rate) + a2_x*(i*self.rate)**2 + a3_x*(i*self.rate)**3
             self.pos_y = a0_y + a1_y*(i*self.rate) + a2_y*(i*self.rate)**2 + a3_y*(i*self.rate)**3
@@ -133,11 +136,14 @@ class MinimalService(Node):
             self.orient_pitch = a0_pitch + a1_pitch*(i*self.rate) + a2_pitch*(i*self.rate)**2 + a3_pitch*(i*self.rate)**3
             self.orient_yaw = a0_yaw + a1_yaw*(i*self.rate) + a2_yaw*(i*self.rate)**2 + a3_yaw*(i*self.rate)**3
 
-            pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_x), z=float(self.pos_x))
+            self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_x), z=float(self.pos_x))
 
-            pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
-   
-            self.publisher.publish(pose_stamped)
+            self.pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
+
+            self.publisher.publish(self.pose_stamped)
+
+            self.marker_show()
+
             time.sleep(self.rate)
 
 
@@ -159,6 +165,43 @@ class MinimalService(Node):
         qz = cos(roll/2) * cos(pitch/2) * sin(yaw/2) - sin(roll/2) * sin(pitch/2) * cos(yaw/2)
         qw = cos(roll/2) * cos(pitch/2) * cos(yaw/2) + sin(roll/2) * sin(pitch/2) * sin(yaw/2)
         return Quaternion(x=qx, y=qy, z=qz, w=qw)
+
+    def marker_init(self):
+
+        self.marker = Marker()
+        self.marker.id  = 0
+        self.marker.action = Marker.DELETEALL
+        self.marker.header.frame_id = "odom"
+        self.marker.header.stamp
+
+        self.marker.type = Marker.LINE_STRIP
+        self.marker.action = Marker.ADD
+        self.marker.scale.x = 0.05
+        self.marker.scale.y = 0.05
+        self.marker.scale.z = 0.05
+        self.marker.color.a = 0.5
+        self.marker.color.r = 1.0
+        self.marker.color.g = 1.0
+        self.marker.color.b = 1.0
+
+        self.marker_pub.publish(self.marker)
+
+    def make_point(self):
+        p = Point()
+        p.x = self.pos_x
+        p.y = self.pos_y
+        p.z = self.pos_z
+        return p
+
+    def marker_show(self):
+        self.path_point = self.make_point()
+        self.marker.points.append(self.path_point)
+        self.marker_pub.publish(self.marker)
+
+        print(self.marker.points)
+
+        self.marker_pub.publish(self.marker)
+
 
 def main(args=None):
     rclpy.init(args=args)
