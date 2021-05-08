@@ -190,36 +190,26 @@ class MinimalService(Node):
     def calc_position(self):
 
         params = self.robot_params
+        positions = [self.position1, self.position2, self.position3, 0]
         T = np.eye(4)
 
-        for i, link in enumerate(params.keys()):
+        for i in range(len(params.keys())):
+
+            theta = positions[i]
+
+            if i == 0:
+                link = 'base'
+            if i == 1:
+                link = 'base_ext'
+            if i == 2:
+                link = 'arm'
+            if i == 3:
+                link = 'hand'
             
             d = params[link]['d']
-            theta = params[link]['theta']
             a = params[link]['a']
             alpha = params[link]['alpha']
-
-            if i ==1:
-                d = params['base_ext']['d']
-                a = params['base_ext']['a']
-
-            if i ==2:
-                d = params['arm']['d']
-                a = params['arm']['a']
             
-            if i==3:
-                d = params['hand']['d']
-                a = params['hand']['a']
-            
-            if len(params.keys()) != i+1:
-                if i == 1:
-                    theta = self.position1
-                if i == 2:
-                    theta = self.position2
-                if i == 3:
-                    theta = self.position3
-            else:
-                theta = 0
             
             Rotx = np.array([[1, 0, 0, 0],
                                 [0, cos(alpha), -sin(alpha), 0],
