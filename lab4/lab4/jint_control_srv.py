@@ -55,8 +55,8 @@ class MinimalService(Node):
 
             if request.interpolation_type == 'Linear':
                 self.linear_interpolation(request.joint1, request.joint2, request.joint3, request.time)
-            elif request.interpolation_type == 'Spline':
-                self.spline_interpolation(request.joint1, request.joint2, request.joint3, request.time)
+            elif request.interpolation_type == 'Polynomial':
+                self.polynomial_interpolation(request.joint1, request.joint2, request.joint3, request.time)
 
             response.response = "Interpolacja zakończona pomyślnie"
             return response
@@ -87,7 +87,7 @@ class MinimalService(Node):
 
             time.sleep(self.rate)
         
-    def spline_interpolation(self, req_pos1, req_pos2, req_pos3, int_time):
+    def polynomial_interpolation(self, req_pos1, req_pos2, req_pos3, int_time):
         joint_state = JointState()
         moves = (int)(int_time/self.rate)
         a0_1 = self.position1
@@ -143,7 +143,7 @@ class MinimalService(Node):
             self.get_logger().error(err)
             raise ValueError(err)
 
-        if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Spline'):
+        if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Polynomial'):
             err = 'Zły typ interpolacji'
             self.get_logger().error(err)
             raise ValueError(err)
