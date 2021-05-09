@@ -57,7 +57,7 @@ class MinimalService(Node):
             return response
         
         except ValueError as e:
-            response.response = "Interpolacja niemozliwa" + e.args[0]
+            response.response = "Interpolacja niemozliwa. " + e.args[0]
             return response
         
     def linear_interpolation(self, req_x, req_y, req_z, req_roll, req_pitch, req_yaw, int_time):
