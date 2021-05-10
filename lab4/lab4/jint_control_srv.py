@@ -22,6 +22,8 @@ class MinimalService(Node):
         self.publisher = self.create_publisher(JointState, "/joint_states", qos_profile)
         self.marker_pub = self.create_publisher(MarkerArray, '/marker', qos_profile)
         self.robot_params = read_params()
+        self.clock = self.create_timer(1, self.publish_position)
+        self.clock
 
         self.declare_parameters(
                 namespace='',
@@ -65,30 +67,22 @@ class MinimalService(Node):
             return response
         
     def linear_interpolation(self, req_pos1, req_pos2, req_pos3, int_time):
-        joint_state = JointState()
         moves = (int)(int_time/self.rate)
         increment1 = (req_pos1 - self.start_position1)/moves
         increment2 = (req_pos2 - self.start_position2)/moves
         increment3 = (req_pos3 - self.start_position3)/moves
 
         for i in range(moves):
-            now = self.get_clock().now()
-            joint_state.header.stamp = now.to_msg()
-            joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
-            
             self.position1 += increment1
             self.position2 += increment2
             self.position3 += increment3
 
-            joint_state.position = [float(self.position1),float(self.position2),float(self.position3)]
-            self.publisher.publish(joint_state)
-
+            self.publish_position()
             self.marker_show()
 
             time.sleep(self.rate)
         
     def polynomial_interpolation(self, req_pos1, req_pos2, req_pos3, int_time):
-        joint_state = JointState()
         moves = (int)(int_time/self.rate)
         a0_1 = self.position1
         a0_2 = self.position2
@@ -107,20 +101,23 @@ class MinimalService(Node):
         a3_3 = -2*(req_pos3-self.position3)/(int_time**3)
 
         for i in range(moves):
-            now = self.get_clock().now()
-            joint_state.header.stamp = now.to_msg()
-            joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
             
             self.position1 = a0_1 + a1_1*(i*self.rate) + a2_1*(i*self.rate)**2 + a3_1*(i*self.rate)**3
             self.position2 = a0_2 + a1_2*(i*self.rate) + a2_2*(i*self.rate)**2 + a3_2*(i*self.rate)**3
             self.position3 = a0_3 + a1_3*(i*self.rate) + a2_3*(i*self.rate)**2 + a3_3*(i*self.rate)**3
 
-            joint_state.position = [float(self.position1),float(self.position2),float(self.position3)]
-            self.publisher.publish(joint_state)
-
+            self.publish_position()
             self.marker_show()
 
             time.sleep(self.rate)
+
+    def publish_position(self):
+        joint_state = JointState()
+        now = self.get_clock().now()
+        joint_state.header.stamp = now.to_msg()
+        joint_state.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
+        joint_state.position = [float(self.position1),float(self.position2),float(self.position3)]
+        self.publisher.publish(joint_state)
 
     def request_check(self, request):
         if(request.joint1 < 0 or request.joint1 > 2*pi):
