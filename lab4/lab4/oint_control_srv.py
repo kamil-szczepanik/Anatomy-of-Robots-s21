@@ -22,12 +22,15 @@ class MinimalService(Node):
 
         self.rate = 0.1
         # initial position and orientation
-        self.pos_x = 0
-        self.pos_y = 0
-        self.pos_z = 0
-        self.orient_roll = 0
-        self.orient_pitch = 0
-        self.orient_yaw = 0
+        self.pos_x = 0.0
+        self.pos_y = 0.0
+        self.pos_z = 0.0
+        self.orient_roll = 0.0
+        self.orient_pitch = 0.0
+        self.orient_yaw = 0.0
+
+        self.clock = self.create_timer(1, self.publish_position)
+        self.clock
 
 
     def oint_control_srv_callback(self, request, response):
@@ -197,6 +200,18 @@ class MinimalService(Node):
         self.path_point = self.make_point()
         self.marker.points.append(self.path_point)
         self.marker_pub.publish(self.marker)
+
+
+
+    def publish_position(self):
+        pose_stamped = PoseStamped()
+        now = self.get_clock().now()
+        pose_stamped.header.stamp = now.to_msg()
+        pose_stamped.header.frame_id = "odom"
+        pose_stamped.pose.position = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
+        pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
+        self.publisher.publish(pose_stamped)
+
 
 def main(args=None):
     rclpy.init(args=args)
