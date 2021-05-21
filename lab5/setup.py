@@ -29,7 +29,8 @@ setup(
     entry_points={
         'console_scripts': [
             'oint_srv = lab5.oint_control_srv:main',
-            'oint_cli = lab5.oint:main'
+            'oint_cli = lab5.oint:main',
+            'ikin = lab5.ikin:main'
         ],
     },
 )

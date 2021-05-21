@@ -48,7 +48,7 @@ class MinimalService(Node):
         try:
             self.request_check(request)
             self.pose_stamped = PoseStamped()
-            self.pose_stamped.header.frame_id = "odom"
+            self.pose_stamped.header.frame_id = "base"
             self.marker_init()
 
             if request.interpolation_type == "Linear":
@@ -174,7 +174,7 @@ class MinimalService(Node):
         self.marker = Marker()
         self.marker.id  = 0
         self.marker.action = Marker.DELETEALL
-        self.marker.header.frame_id = "odom"
+        self.marker.header.frame_id = "base"
         self.marker.header.stamp
 
         self.marker.type = Marker.LINE_STRIP
@@ -207,7 +207,7 @@ class MinimalService(Node):
         pose_stamped = PoseStamped()
         now = self.get_clock().now()
         pose_stamped.header.stamp = now.to_msg()
-        pose_stamped.header.frame_id = "odom"
+        pose_stamped.header.frame_id = "base"
         pose_stamped.pose.position = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
         pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
         self.publisher.publish(pose_stamped)
