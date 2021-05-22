@@ -6,7 +6,7 @@ from geometry_msgs.msg import PoseStamped, Pose, Quaternion, Point
 
 from visualization_msgs.msg import Marker, MarkerArray
 
-from math import sin, cos, sqrt
+from math import sin, cos, sqrt, pi
 import time
 
 import yaml
@@ -199,11 +199,16 @@ class MinimalService(Node):
                 if not self.request_check_rectangle_points(request):
                     response.response = "Interpolacja niemozliwa. Punkty prostokąta poza zasiegiem"
                     raise ValueError("Interpolacja niemozliwa. Punkty prostokąta poza zasiegiem")
-
                 else:
                     self.draw_rectangle(request)
 
-            
+            elif request.trajectory_type == "Ellipse":
+                if not self.request_check_ellipse(request):
+                    response.response = "Interpolacja niemozliwa. Punkty elipsy poza zasiegiem"
+                    raise ValueError("Interpolacja niemozliwa. Punkty elipsy poza zasiegiem")
+                else:
+                    self.draw_ellipse(request)
+
             response.response = "Interpolacja zakonczona pomyslnie"
             return response
         
@@ -212,7 +217,6 @@ class MinimalService(Node):
             return response
 
 
-        
     
     def request_check_interpolation_type(self, request):
         if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Polynomial'):
@@ -221,8 +225,8 @@ class MinimalService(Node):
             raise ValueError(err)
 
     def request_check_trajectory_type(self, request):
-        if(request.trajectory_type != 'Rectangle' and request.interpolation_type != 'Ellipse'):
-            err = 'Zly typ interpolacji'
+        if(request.trajectory_type != 'Rectangle' and request.trajectory_type != 'Ellipse'):
+            err = 'Zly typ trajektorii'
             self.get_logger().error(err)
             raise ValueError(err)
 
@@ -242,15 +246,24 @@ class MinimalService(Node):
         D = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z - request.param_b)
         return [A, B, C, D]
 
-        
+    def find_ellipse_points(self, request):
+        moves = (int)(request.time/self.rate)
+        points = []
+        for i in range(moves):
+            centre_x = self.pos_x-request.param_a
+            new_point = Point(x=centre_x+request.param_a*cos(2*pi*i/moves), y=self.pos_y, z=self.pos_z + request.param_b*sin(2*pi*i/moves))
+            points.append(new_point)
+        return points
     
-    def request_check_ellipse(self, rectangle):
-        pass
 
-        if(request.z < 0):
-            err = 'Niepoprawna wartość z'
-            self.get_logger().error(err) 
-            raise ValueError(err)
+    def request_check_ellipse(self, request):
+        inRange = True
+        points = self.find_ellipse_points(request)
+        for point in points:
+            if not self.check_if_goal_is_in_range([point.x, point.y, point.z]):
+                inRange = False
+        return inRange
+
 
     def request_check_time(self, request):
         if(request.time <= 0):
@@ -286,6 +299,15 @@ class MinimalService(Node):
             self.polynomial_interpolation(points[2].x, points[2].y, points[2].z, quarter)
             self.polynomial_interpolation(points[3].x, points[3].y, points[3].z, quarter)
             self.polynomial_interpolation(points[0].x, points[0].y, points[0].z, quarter)
+    
+    def draw_ellipse(self, request):
+        moves = (int)(request.time/self.rate)
+        time_fragment = request.time/moves
+        points = self.find_ellipse_points(request)
+        if request.interpolation_type == "Linear":
+            for point in points:
+                self.linear_interpolation(point.x , point.y, point.z, time_fragment)
+
 
 
  
