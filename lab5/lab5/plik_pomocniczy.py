@@ -4,7 +4,7 @@ import numpy as np
 params = {"base":{"a":0,"d":0.05,"alpha":0}, 
 	"base_ext":{"a":0,"d":0,"alpha":-pi/2},
 	"arm":{"a":1,"d":0,"alpha":0},
-	"hand":{"a":0.5,"d":0,"alpha":0}}
+	"hand":{"a":1,"d":0,"alpha":0}}
 
 def calc(t1, t2 ,t3):
 
@@ -51,7 +51,7 @@ def calc(t1, t2 ,t3):
 		T_curr = Rotx@Transx@Rotz@Transz
 		T = T @ T_curr
 
-	xyz = [round(T[0][3],4), round(T[1][3],4), round(T[2][3],4)]
+	xyz = [T[0][3], T[1][3], T[2][3]]
 
 	return xyz
 
@@ -65,7 +65,7 @@ def un_calc1(x,y,z):
 	try:
 		t1 = atan2(y,x)
 		t3 = acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-		t2 = -asin(a3*sin(t3)/((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
+		t2 = -asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
 	except Exception:
 		print("1\n")
 		t1=t2=t3=0
@@ -78,7 +78,7 @@ def un_calc2(x,y,z):
 	try:
 		t1 = atan2(y,x)
 		t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-		t2 = -asin(a3*sin(t3)/((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
+		t2 = -asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
 	except Exception:
 		print("2\n")
 		t1=t2=t3=0
@@ -91,7 +91,7 @@ def un_calc3(x,y,z):
 	try:
 		t1 = atan2(y,x)+pi
 		t3 = acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-		t2 = pi - asin(a3*sin(t3)/((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
+		t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
 	except Exception:
 		print("3\n")
 		t1=t2=t3=0
@@ -104,13 +104,13 @@ def un_calc4(x,y,z):
 	try:
 		t1 = atan2(y,x)+pi
 		t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-		t2 = pi - asin(a3*sin(t3)/((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
+		t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
 	except Exception:
 		print("4\n")
 		t1=t2=t3=0
 	return (t1,t2,t3)
 
-u_case = un_calc(0,1,0)
+u_case = un_calc(1,0,1)
 
 print(u_case[0],calc(*u_case[0]))
 print(u_case[1],calc(*u_case[1]))

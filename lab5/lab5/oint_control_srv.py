@@ -19,6 +19,7 @@ class MinimalService(Node):
         qos_profile = QoSProfile(depth=10)
         self.publisher = self.create_publisher(PoseStamped, "/position", qos_profile)
         self.marker_pub = self.create_publisher(Marker, "/path_marker", qos_profile)
+        
 
         self.rate = 0.1
         # initial position
