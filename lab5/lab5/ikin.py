@@ -26,7 +26,7 @@ class Ikin(Node):
         self.joint_states = JointState()
 
         self.params = read_params()
-        self.positions = [2.0,0,0.05]
+        self.joints = [0.0,0.0,0.0]
     
         self.clock = self.create_timer(1, self.publish_joint_states)
         self.clock
@@ -38,13 +38,14 @@ class Ikin(Node):
         y = msg.pose.position.y
         z = msg.pose.position.z
 
-        u_case = self.un_calc(x,y,z)
+        try:
+            u_case = self.un_calc(x,y,z)
+            idx = self.choose_un_calc(u_case)
+            self.joints = u_case[idx]
 
-        # TUTAJ WYBIERA PIERWSZĄ OPCJE:
-        # TODO: wybranie opcji, która najmniej zmienia położenie jointów
-        self.positions = u_case[0]
-
-        self.publish_joint_states()
+            self.publish_joint_states()
+        except Exception:
+            self.get_logger().error("Nie można osiągnąć zadanej pozycji")
 
     
     def publish_joint_states(self):
@@ -52,9 +53,30 @@ class Ikin(Node):
         self.joint_states.header.stamp = now.to_msg()
         self.joint_states.name = ['base-base_ext', 'base_ext-arm', 'arm-hand']
 
-        self.joint_states.position = [float(self.positions[0]) , float(self.positions[1]), float(self.positions[2]) ]
+        self.joint_states.position = [float(self.joints[0]) , float(self.joints[1]), float(self.joints[2]) ]
 
         self.joint_state_pub.publish(self.joint_states)
+
+    def choose_un_calc(self, u_case):
+        ths = self.joints
+        uc1 = u_case[0]
+        max_distance1 = max((ths[0]-uc1[0])**2,(ths[1]-uc1[1])**2,(ths[2]-uc1[2])**2)
+        uc2 = u_case[1]
+        max_distance2 = max((ths[0]-uc2[0])**2,(ths[1]-uc2[1])**2,(ths[2]-uc2[2])**2)
+        uc3 = u_case[2]
+        max_distance3 = max((ths[0]-uc3[0])**2,(ths[1]-uc3[1])**2,(ths[2]-uc3[2])**2)
+        uc4 = u_case[3]
+        max_distance4 = max((ths[0]-uc4[0])**2,(ths[1]-uc4[1])**2,(ths[2]-uc4[2])**2)
+        value = min(max_distance1,max_distance2,max_distance3,max_distance4)
+
+        if value == max_distance1:
+            return 0
+        if value == max_distance2:
+            return 1
+        if value == max_distance3:
+            return 2
+        if value == max_distance4:
+            return 3
 
 
     def un_calc(self, x, y, z):
@@ -65,13 +87,10 @@ class Ikin(Node):
         a2 = params["arm"]["a"]
         a3 = params["hand"]["a"]
         d1 = params["base"]["d"]
-        try:
-            t1 = atan2(y,x)
-            t3 = acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-            t2 = -asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
-        except Exception:
-            print("1\n")
-            t1=t2=t3=0
+
+        t1 = atan2(y,x)
+        t3 = acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
+        t2 = -asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
         return (t1,t2,t3)
 
     def un_calc2(self,x,y,z):
@@ -79,13 +98,10 @@ class Ikin(Node):
         a2 = params["arm"]["a"]
         a3 = params["hand"]["a"]
         d1 = params["base"]["d"]
-        try:
-            t1 = atan2(y,x)
-            t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-            t2 = -asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
-        except Exception:
-            print("2\n")
-            t1=t2=t3=0
+
+        t1 = atan2(y,x)
+        t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
+        t2 = -asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2))-atan2((z-d1),sqrt(x**2+y**2))
         return (t1,t2,t3)
 
     def un_calc3(self,x,y,z):
@@ -93,13 +109,11 @@ class Ikin(Node):
         a2 = params["arm"]["a"]
         a3 = params["hand"]["a"]
         d1 = params["base"]["d"]
-        try:
-            t1 = atan2(y,x)+pi
-            t3 = acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-            t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
-        except Exception:
-            print("3\n")
-            t1=t2=t3=0
+
+        t1 = atan2(y,x)+pi
+        t3 = acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
+        t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
+
         return (t1,t2,t3)
 
     def un_calc4(self,x,y,z):
@@ -107,13 +121,11 @@ class Ikin(Node):
         a2 = params["arm"]["a"]
         a3 = params["hand"]["a"]
         d1 = params["base"]["d"]
-        try:
-            t1 = atan2(y,x)+pi
-            t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
-            t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
-        except Exception:
-            print("4\n")
-            t1=t2=t3=0
+
+        t1 = atan2(y,x)+pi
+        t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
+        t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
+
         return (t1,t2,t3)
 
 def read_params():

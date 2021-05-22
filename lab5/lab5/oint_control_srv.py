@@ -6,9 +6,12 @@ from geometry_msgs.msg import PoseStamped, Pose, Quaternion, Point
 
 from visualization_msgs.msg import Marker, MarkerArray
 
-from math import sin, cos
+from math import sin, cos, sqrt
 import time
 
+import yaml
+from ament_index_python.packages import get_package_share_directory
+import os
 from interpolation_srv.srv import OintXYZ
 
 class MinimalService(Node):
@@ -19,7 +22,7 @@ class MinimalService(Node):
         qos_profile = QoSProfile(depth=10)
         self.publisher = self.create_publisher(PoseStamped, "/position", qos_profile)
         self.marker_pub = self.create_publisher(Marker, "/path_marker", qos_profile)
-        
+        self.robot_params = read_params()
 
         self.rate = 0.1
         # initial position
@@ -117,6 +120,17 @@ class MinimalService(Node):
 
 
     def request_check(self, request):
+        if(request.z < 0):
+            err = 'Niepoprawna wartość z'
+            self.get_logger().error(err) 
+            raise ValueError(err)
+
+        req_distance = sqrt(request.x**2+request.y**2+(request.z-self.robot_params['base']['d'])**2)
+        possible_distance = self.robot_params['arm']['a']+self.robot_params['hand']['a']
+        if(req_distance > possible_distance):
+            err = 'Cel nieosiągalny'
+            self.get_logger().error(err)               
+            raise ValueError(err)
 
         if(request.time <= 0):
             err = 'Niepoprawna wartość czasu'
@@ -127,13 +141,6 @@ class MinimalService(Node):
             err = 'Zly typ interpolacji'
             self.get_logger().error(err)
             raise ValueError(err)
-
-    def quaternion_from_euler(self, roll, pitch, yaw):
-        qx = sin(roll/2) * cos(pitch/2) * cos(yaw/2) - cos(roll/2) * sin(pitch/2) * sin(yaw/2)
-        qy = cos(roll/2) * sin(pitch/2) * cos(yaw/2) + sin(roll/2) * cos(pitch/2) * sin(yaw/2)
-        qz = cos(roll/2) * cos(pitch/2) * sin(yaw/2) - sin(roll/2) * sin(pitch/2) * cos(yaw/2)
-        qw = cos(roll/2) * cos(pitch/2) * cos(yaw/2) + sin(roll/2) * sin(pitch/2) * sin(yaw/2)
-        return Quaternion(x=qx, y=qy, z=qz, w=qw)
 
     def marker_init(self):
 
@@ -174,6 +181,13 @@ class MinimalService(Node):
         pose_stamped.header.frame_id = "base"
         pose_stamped.pose.position = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
         self.publisher.publish(pose_stamped)
+
+
+def read_params():
+    with open(os.path.join(get_package_share_directory('lab5'), 'params.yaml'), 'r') as file:
+        params = yaml.load(file, Loader=yaml.FullLoader)
+
+        return params
 
 
 def main(args=None):

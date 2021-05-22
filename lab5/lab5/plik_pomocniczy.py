@@ -105,12 +105,13 @@ def un_calc4(x,y,z):
 		t1 = atan2(y,x)+pi
 		t3 = -acos(((z-d1)**2+x**2+y**2-a2**2-a3**2)/(2*a2*a3))
 		t2 = pi - asin(a3*sin(t3)/sqrt((z-d1)**2+x**2+y**2)) + atan2((z-d1),sqrt(x**2+y**2))
-	except Exception:
+	except Exception as e:
 		print("4\n")
+		print(e)
 		t1=t2=t3=0
 	return (t1,t2,t3)
 
-u_case = un_calc(1,0,1)
+u_case = un_calc(3,0,1)
 
 print(u_case[0],calc(*u_case[0]))
 print(u_case[1],calc(*u_case[1]))
