@@ -13,12 +13,15 @@ import yaml
 from ament_index_python.packages import get_package_share_directory
 import os
 from interpolation_srv.srv import OintXYZ
+from interpolation_srv.srv import TrajectoryPath
 
 class MinimalService(Node):
 
     def __init__(self):
         super().__init__('minimal_service')
         self.srv = self.create_service(OintXYZ, 'oint_control_srv', self.oint_control_srv_callback)
+        self.trajectory_srv = self.create_service(TrajectoryPath, 'trajectory_srv', self.trajectory_srv_callback)
+        
         qos_profile = QoSProfile(depth=10)
         self.publisher = self.create_publisher(PoseStamped, "/position", qos_profile)
         self.marker_pub = self.create_publisher(Marker, "/path_marker", qos_profile)
@@ -181,6 +184,112 @@ class MinimalService(Node):
         pose_stamped.header.frame_id = "base"
         pose_stamped.pose.position = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
         self.publisher.publish(pose_stamped)
+
+    def trajectory_srv_callback(self, request, response):
+
+        try:
+            self.request_check_interpolation_type(request)
+            self.request_check_trajectory_type(request)
+            self.request_check_time(request)
+            self.pose_stamped = PoseStamped()
+            self.pose_stamped.header.frame_id = "base"
+            self.marker_init()
+
+            if request.trajectory_type == "Rectangle":
+                if not self.request_check_rectangle_points(request):
+                    response.response = "Interpolacja niemozliwa. Punkty prostokąta poza zasiegiem"
+                    raise ValueError("Interpolacja niemozliwa. Punkty prostokąta poza zasiegiem")
+
+                else:
+                    self.draw_rectangle(request)
+
+            
+            response.response = "Interpolacja zakonczona pomyslnie"
+            return response
+        
+        except ValueError as e:
+            response.response = "Interpolacja niemozliwa. " + e.args[0]
+            return response
+
+
+        
+    
+    def request_check_interpolation_type(self, request):
+        if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Polynomial'):
+            err = 'Zly typ interpolacji'
+            self.get_logger().error(err)
+            raise ValueError(err)
+
+    def request_check_trajectory_type(self, request):
+        if(request.trajectory_type != 'Rectangle' and request.interpolation_type != 'Ellipse'):
+            err = 'Zly typ interpolacji'
+            self.get_logger().error(err)
+            raise ValueError(err)
+
+    def request_check_rectangle_points(self, request):
+        inRange = True
+        points = self.find_rectangle_points(request)
+        for point in points:
+            if not self.check_if_goal_is_in_range([point.x, point.y, point.z]):
+                inRange = False
+        return inRange
+
+
+    def find_rectangle_points(self, request):
+        A = Point(x=self.pos_x , y=self.pos_y, z=self.pos_z)
+        B = Point(x=self.pos_x + request.param_a, y=self.pos_y, z=self.pos_z)
+        C = Point(x=self.pos_x + request.param_a, y=self.pos_y, z=self.pos_z - request.param_b)
+        D = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z - request.param_b)
+        return [A, B, C, D]
+
+        
+    
+    def request_check_ellipse(self, rectangle):
+        pass
+
+        if(request.z < 0):
+            err = 'Niepoprawna wartość z'
+            self.get_logger().error(err) 
+            raise ValueError(err)
+
+    def request_check_time(self, request):
+        if(request.time <= 0):
+            err = 'Niepoprawna wartość czasu'
+            self.get_logger().error(err)
+            raise ValueError(err)
+
+
+    def check_if_goal_is_in_range(self, goal):
+ 
+        x = goal[0]
+        y = goal[1]
+        z = goal[2]
+ 
+        sphere_centre = [0, 0, self.robot_params["base"]["d"]]
+        c_x = sphere_centre[0]
+        c_y = sphere_centre[1]
+        c_z = sphere_centre[2]
+        radius = self.robot_params["arm"]["a"] + self.robot_params["hand"]["a"]
+ 
+        return ( (x-c_x)**2 + (y-c_y)**2 + (z-c_z)**2 <= radius**2 )
+    
+    def draw_rectangle(self, request):
+        quarter = request.time/4
+        points = self.find_rectangle_points(request)
+        if request.interpolation_type == "Linear":
+            self.linear_interpolation(points[1].x, points[1].y, points[1].z, quarter)
+            self.linear_interpolation(points[2].x, points[2].y, points[2].z, quarter)
+            self.linear_interpolation(points[3].x, points[3].y, points[3].z, quarter)
+            self.linear_interpolation(points[0].x, points[0].y, points[0].z, quarter)
+        elif request.interpolation_type == "Polynomial":
+            self.polynomial_interpolation(points[1].x, points[1].y, points[1].z, quarter)
+            self.polynomial_interpolation(points[2].x, points[2].y, points[2].z, quarter)
+            self.polynomial_interpolation(points[3].x, points[3].y, points[3].z, quarter)
+            self.polynomial_interpolation(points[0].x, points[0].y, points[0].z, quarter)
+
+
+ 
+ 
 
 
 def read_params():

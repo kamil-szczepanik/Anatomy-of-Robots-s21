@@ -30,6 +30,7 @@ setup(
         'console_scripts': [
             'oint_srv = lab5.oint_control_srv:main',
             'oint_cli = lab5.oint:main',
+            'trajectory_cli = lab5.trajectory:main',
             'ikin = lab5.ikin:main'
         ],
     },

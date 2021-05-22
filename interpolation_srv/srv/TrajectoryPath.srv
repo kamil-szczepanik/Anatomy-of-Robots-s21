@@ -1,12 +1,15 @@
+# type of trajectory
+string trajectory_type
+
+# type of interpolation
+string interpolation_type
+
+float64 param_a
+float64 param_b
 
 # movement time
 float64 time
 
-# type of trajectory
-string trajectory_type
-
-float64 param_a
-float64 param_b
 ---
 # service response
 string response
