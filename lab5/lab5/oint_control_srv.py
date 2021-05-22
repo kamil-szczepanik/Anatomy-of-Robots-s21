@@ -287,6 +287,7 @@ class MinimalService(Node):
         return ( (x-c_x)**2 + (y-c_y)**2 + (z-c_z)**2 <= radius**2 )
     
     def draw_rectangle(self, request):
+        self.marker_show()
         quarter = request.time/4
         points = self.find_rectangle_points(request)
         if request.interpolation_type == "Linear":
@@ -301,6 +302,7 @@ class MinimalService(Node):
             self.polynomial_interpolation(points[0].x, points[0].y, points[0].z, quarter)
     
     def draw_ellipse(self, request):
+        self.marker_show()
         moves = (int)(request.time/self.rate)
         time_fragment = request.time/moves
         points = self.find_ellipse_points(request)
