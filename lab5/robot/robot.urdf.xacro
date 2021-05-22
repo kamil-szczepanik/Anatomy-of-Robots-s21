@@ -1,8 +1,8 @@
 <robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
   
   <!-- BGN - Include -->
-  <xacro:include filename="$(find lab3)/load_params.urdf.xacro" />
-  <xacro:include filename="$(find lab3)/links_and_joints.urdf.xacro" />
+  <xacro:include filename="$(find lab5)/load_params.urdf.xacro" />
+  <xacro:include filename="$(find lab5)/links_and_joints.urdf.xacro" />
   <!-- END - Include -->
   
 

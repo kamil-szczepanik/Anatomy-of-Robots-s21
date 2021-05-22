@@ -17,7 +17,7 @@ arm:
   theta: 0.0
 
 hand:
-  a: 0.5
+  a: 1.0
   alpha: 0.0
   d: 0.0
   theta: 0.0

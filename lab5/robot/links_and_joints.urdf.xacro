@@ -1,6 +1,6 @@
 <robot name="robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find lab3)/materials.urdf.xacro" />
+  <xacro:include filename="$(find lab5)/materials.urdf.xacro" />
 
     <xacro:macro name="m_link_cylinder" params="name origin_xyz origin_rpy radius length material">
         <link name="${name}">
@@ -67,7 +67,7 @@
       <visual>
         <origin rpy="${origin_rpy}" xyz="${origin_xyz}" />
         <geometry>
-          <mesh filename = "package://lab3/gatling.stl" scale="${scale}"/>
+          <mesh filename = "package://lab5/gatling.stl" scale="${scale}"/>
         </geometry>
       </visual>
     </link>

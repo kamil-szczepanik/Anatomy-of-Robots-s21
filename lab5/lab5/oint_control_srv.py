@@ -9,25 +9,22 @@ from visualization_msgs.msg import Marker, MarkerArray
 from math import sin, cos
 import time
 
-from interpolation_srv.srv import Oint
+from interpolation_srv.srv import OintXYZ
 
 class MinimalService(Node):
 
     def __init__(self):
         super().__init__('minimal_service')
-        self.srv = self.create_service(Oint, 'oint_control_srv', self.oint_control_srv_callback)
+        self.srv = self.create_service(OintXYZ, 'oint_control_srv', self.oint_control_srv_callback)
         qos_profile = QoSProfile(depth=10)
         self.publisher = self.create_publisher(PoseStamped, "/position", qos_profile)
         self.marker_pub = self.create_publisher(Marker, "/path_marker", qos_profile)
 
         self.rate = 0.1
-        # initial position and orientation
-        self.pos_x = 0.0
+        # initial position
+        self.pos_x = 2.0
         self.pos_y = 0.0
-        self.pos_z = 0.0
-        self.orient_roll = 0.0
-        self.orient_pitch = 0.0
-        self.orient_yaw = 0.0
+        self.pos_z = 0.05
 
         self.clock = self.create_timer(1, self.publish_position)
         self.clock
@@ -39,9 +36,6 @@ class MinimalService(Node):
                                 f' - x: {request.x}\n' +
                                 f' - y: {request.y}\n'+
                                 f' - z: {request.z}\n'+
-                                f' - roll: {request.roll}\n' +
-                                f' - pitch: {request.pitch}\n'+
-                                f' - yaw: {request.yaw}\n'+
                                 f' -- time: {request.time}\n'+
                                 f' --- interpolation type: {request.interpolation_type}')
 
@@ -52,9 +46,9 @@ class MinimalService(Node):
             self.marker_init()
 
             if request.interpolation_type == "Linear":
-                self.linear_interpolation(request.x, request.y, request.z, request.roll, request.pitch, request.yaw, request.time)
+                self.linear_interpolation(request.x, request.y, request.z, request.time)
             elif request.interpolation_type == "Polynomial":
-                self.polynomial_interpolation(request.x, request.y, request.z, request.roll, request.pitch, request.yaw, request.time)
+                self.polynomial_interpolation(request.x, request.y, request.z, request.time)
             
             response.response = "Interpolacja zakonczona pomyslnie"
             return response
@@ -63,17 +57,13 @@ class MinimalService(Node):
             response.response = "Interpolacja niemozliwa. " + e.args[0]
             return response
         
-    def linear_interpolation(self, req_x, req_y, req_z, req_roll, req_pitch, req_yaw, int_time):
+    def linear_interpolation(self, req_x, req_y, req_z, int_time):
 
         moves = (int)(int_time/self.rate)    
 
         pos_x_increment = (req_x - self.pos_x)/moves
         pos_y_increment = (req_y - self.pos_y)/moves
         pos_z_increment = (req_z - self.pos_z)/moves
-
-        roll_increment = (req_roll-self.orient_roll)/moves
-        pitch_increment = (req_pitch-self.orient_pitch)/moves
-        yaw_increment = (req_yaw-self.orient_yaw)/moves
 
         for i in range(moves):
             now = self.get_clock().now()
@@ -83,13 +73,7 @@ class MinimalService(Node):
             self.pos_y += pos_y_increment
             self.pos_z += pos_z_increment
 
-            self.orient_roll += roll_increment
-            self.orient_pitch += pitch_increment
-            self.orient_yaw += yaw_increment
-
             self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_y), z=float(self.pos_z))
-
-            self.pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
             
             self.publisher.publish(self.pose_stamped)
 
@@ -97,7 +81,7 @@ class MinimalService(Node):
 
             time.sleep(self.rate)
 
-    def polynomial_interpolation(self, req_x, req_y, req_z, req_roll, req_pitch, req_yaw, int_time):
+    def polynomial_interpolation(self, req_x, req_y, req_z, int_time):
         
         moves = (int)(int_time/self.rate)
 
@@ -114,19 +98,6 @@ class MinimalService(Node):
         a3_y = -2*(req_y - self.pos_y)/(int_time**3)
         a3_z = -2*(req_z - self.pos_z)/(int_time**3)
 
-        a0_roll = self.orient_roll
-        a0_pitch = self.orient_pitch
-        a0_yaw = self.orient_yaw
-        a1_roll = 0
-        a1_pitch = 0
-        a1_yaw = 0
-        a2_roll = 3*(req_roll - self.orient_roll)/(int_time**2)
-        a2_pitch = 3*(req_pitch - self.orient_pitch)/(int_time**2)
-        a2_yaw = 3*(req_yaw - self.orient_yaw)/(int_time**2)
-        a3_roll = -2*(req_roll - self.orient_roll)/(int_time**3)
-        a3_pitch = -2*(req_pitch - self.orient_pitch)/(int_time**3)
-        a3_yaw = -2*(req_yaw - self.orient_yaw)/(int_time**3)
-
         for i in range(moves):
             now = self.get_clock().now()
             self.pose_stamped.header.stamp = now.to_msg()
@@ -135,13 +106,7 @@ class MinimalService(Node):
             self.pos_y = a0_y + a1_y*(i*self.rate) + a2_y*(i*self.rate)**2 + a3_y*(i*self.rate)**3
             self.pos_z = a0_z + a1_z*(i*self.rate) + a2_z*(i*self.rate)**2 + a3_z*(i*self.rate)**3
 
-            self.orient_roll = a0_roll + a1_roll*(i*self.rate) + a2_roll*(i*self.rate)**2 + a3_roll*(i*self.rate)**3
-            self.orient_pitch = a0_pitch + a1_pitch*(i*self.rate) + a2_pitch*(i*self.rate)**2 + a3_pitch*(i*self.rate)**3
-            self.orient_yaw = a0_yaw + a1_yaw*(i*self.rate) + a2_yaw*(i*self.rate)**2 + a3_yaw*(i*self.rate)**3
-
             self.pose_stamped.pose.position = Point(x=float(self.pos_x), y=float(self.pos_y), z=float(self.pos_z))
-
-            self.pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
 
             self.publisher.publish(self.pose_stamped)
 
@@ -201,15 +166,12 @@ class MinimalService(Node):
         self.marker.points.append(self.path_point)
         self.marker_pub.publish(self.marker)
 
-
-
     def publish_position(self):
         pose_stamped = PoseStamped()
         now = self.get_clock().now()
         pose_stamped.header.stamp = now.to_msg()
         pose_stamped.header.frame_id = "base"
         pose_stamped.pose.position = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
-        pose_stamped.pose.orientation = self.quaternion_from_euler(self.orient_roll, self.orient_pitch, self.orient_yaw)
         self.publisher.publish(pose_stamped)
 
 
