@@ -39,12 +39,12 @@ class MinimalService(Node):
 
     def oint_control_srv_callback(self, request, response):
 
-        self.get_logger().info('Incoming request\n'+
+        self.get_logger().info('Nadchodzące żądanie\n'+
                                 f' - x: {request.x}\n' +
                                 f' - y: {request.y}\n'+
                                 f' - z: {request.z}\n'+
-                                f' -- time: {request.time}\n'+
-                                f' --- interpolation type: {request.interpolation_type}')
+                                f' -- czas: {request.time}\n'+
+                                f' --- typ interpolacji: {request.interpolation_type}')
 
         try:
             self.request_check(request)
@@ -186,6 +186,12 @@ class MinimalService(Node):
         self.publisher.publish(pose_stamped)
 
     def trajectory_srv_callback(self, request, response):
+        self.get_logger().info('Nadchodzące żądanie\n'+
+                        f' - typ trajektorii: {request.trajectory_type}\n' +
+                        f' - parametr a: {request.param_a}\n'+
+                        f' - parametr b: {request.param_b}\n'+
+                        f' -- czas: {request.time}\n'+
+                        f' --- typ interpolacji: {request.interpolation_type}')
 
         try:
             self.request_check_interpolation_type(request)
