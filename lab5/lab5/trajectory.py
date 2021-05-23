@@ -28,10 +28,10 @@ class MinimalClientAsync(Node):
 
 
         except IndexError:
-            print("Niepoprawna liczba parametrów")
+            self.get_logger().error("Niepoprawna liczba parametrów")
             raise IndexError()
         except ValueError:
-            print("Błędne parametry")
+            self.get_logger().error("Błędne parametry")
             raise ValueError()
 
         self.future = self.client.call_async(self.request)
@@ -44,7 +44,7 @@ def main(args=None):
         client = MinimalClientAsync()
         client.send_request()
     except Exception as e:
-        print("Nie udało się uruchomić klienta")
+        client.get_logger().error("Nie udało się uruchomić klienta")
         print(e)
     else:
         try:
