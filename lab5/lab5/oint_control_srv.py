@@ -238,7 +238,7 @@ class MinimalService(Node):
         inRange = True
         points = self.find_rectangle_points(request)
         for point in points:
-            if not self.check_if_goal_is_in_range([point.x, point.y, point.z]):
+            if not self.check_if_goal_is_in_range([point.x, point.y, point.z])>0:
                 inRange = False
         return inRange
 
@@ -288,7 +288,7 @@ class MinimalService(Node):
         c_z = sphere_centre[2]
         radius = self.robot_params["arm"]["a"] + self.robot_params["hand"]["a"]
  
-        return ( (x-c_x)**2 + (y-c_y)**2 + (z-c_z)**2 <= radius**2 )
+        return ( (x-c_x)**2 + (y-c_y)**2 + (z-c_z)**2 <= radius**2 and z>0)
     
     def draw_rectangle(self, request):
         self.marker_show()
