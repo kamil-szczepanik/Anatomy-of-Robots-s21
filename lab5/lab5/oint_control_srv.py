@@ -190,11 +190,9 @@ class MinimalService(Node):
                         f' - typ trajektorii: {request.trajectory_type}\n' +
                         f' - parametr a: {request.param_a}\n'+
                         f' - parametr b: {request.param_b}\n'+
-                        f' -- czas: {request.time}\n'+
-                        f' --- typ interpolacji: {request.interpolation_type}')
+                        f' -- czas: {request.time}\n')
 
         try:
-            self.request_check_interpolation_type(request)
             self.request_check_trajectory_type(request)
             self.request_check_time(request)
             self.pose_stamped = PoseStamped()
@@ -294,25 +292,21 @@ class MinimalService(Node):
         self.marker_show()
         quarter = request.time/4
         points = self.find_rectangle_points(request)
-        if request.interpolation_type == "Linear":
-            self.linear_interpolation(points[1].x, points[1].y, points[1].z, quarter)
-            self.linear_interpolation(points[2].x, points[2].y, points[2].z, quarter)
-            self.linear_interpolation(points[3].x, points[3].y, points[3].z, quarter)
-            self.linear_interpolation(points[0].x, points[0].y, points[0].z, quarter)
-        elif request.interpolation_type == "Polynomial":
-            self.polynomial_interpolation(points[1].x, points[1].y, points[1].z, quarter)
-            self.polynomial_interpolation(points[2].x, points[2].y, points[2].z, quarter)
-            self.polynomial_interpolation(points[3].x, points[3].y, points[3].z, quarter)
-            self.polynomial_interpolation(points[0].x, points[0].y, points[0].z, quarter)
+
+        self.linear_interpolation(points[1].x, points[1].y, points[1].z, quarter)
+        self.linear_interpolation(points[2].x, points[2].y, points[2].z, quarter)
+        self.linear_interpolation(points[3].x, points[3].y, points[3].z, quarter)
+        self.linear_interpolation(points[0].x, points[0].y, points[0].z, quarter)
+
     
     def draw_ellipse(self, request):
         self.marker_show()
         moves = (int)(request.time/self.rate)
         time_fragment = request.time/moves
         points = self.find_ellipse_points(request)
-        if request.interpolation_type == "Linear":
-            for point in points:
-                self.linear_interpolation(point.x , point.y, point.z, time_fragment)
+
+        for point in points:
+            self.linear_interpolation(point.x , point.y, point.z, time_fragment)
 
 
 

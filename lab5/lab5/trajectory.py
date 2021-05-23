@@ -23,12 +23,10 @@ class MinimalClientAsync(Node):
         try:
             self.request.trajectory_type = sys.argv[1]
 
-            self.request.interpolation_type = sys.argv[2]
+            self.request.param_a = float(sys.argv[2])
+            self.request.param_b = float(sys.argv[3])
             
-            self.request.param_a = float(sys.argv[3])
-            self.request.param_b = float(sys.argv[4])
-            
-            self.request.time = float(sys.argv[5])
+            self.request.time = float(sys.argv[4])
 
 
         except IndexError:
