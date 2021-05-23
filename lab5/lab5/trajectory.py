@@ -7,8 +7,6 @@ import sys
 
 from interpolation_srv.srv import TrajectoryPath
 
-# Service - dwa parametry: czas w jakim robot ma się przemieścić i punkt w ktorym ma byc końcowka
-
 class MinimalClientAsync(Node):
 
     def __init__(self):
@@ -37,7 +35,6 @@ class MinimalClientAsync(Node):
             raise ValueError()
 
         self.future = self.client.call_async(self.request)
-
 
 
 def main(args=None):

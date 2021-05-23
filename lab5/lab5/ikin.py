@@ -30,7 +30,6 @@ class Ikin(Node):
     
         self.clock = self.create_timer(1, self.publish_joint_states)
         self.clock
-
     
     def position_callback(self, msg):
 
@@ -47,7 +46,6 @@ class Ikin(Node):
         except Exception:
             self.get_logger().error("Nie można osiągnąć zadanej pozycji")
 
-    
     def publish_joint_states(self):
         now = self.get_clock().now()
         self.joint_states.header.stamp = now.to_msg()
@@ -77,7 +75,6 @@ class Ikin(Node):
             return 2
         if value == max_distance4:
             return 3
-
 
     def un_calc(self, x, y, z):
         return [self.un_calc1(x,y,z),self.un_calc2(x,y,z),self.un_calc3(x,y,z),self.un_calc4(x,y,z)]
@@ -128,11 +125,13 @@ class Ikin(Node):
 
         return (t1,t2,t3)
 
+
 def read_params():
     with open(os.path.join(get_package_share_directory('lab5'), 'params.yaml'), 'r') as file:
         params = yaml.load(file, Loader=yaml.FullLoader)
 
         return params
+
 
 def main():
     rclpy.init()

@@ -36,7 +36,6 @@ class MinimalService(Node):
         self.clock = self.create_timer(1, self.publish_position)
         self.clock
 
-
     def oint_control_srv_callback(self, request, response):
 
         self.get_logger().info('Nadchodzące żądanie\n'+
@@ -120,7 +119,6 @@ class MinimalService(Node):
             self.marker_show()
 
             time.sleep(self.rate)
-
 
     def request_check(self, request):
         if(request.z < 0):
@@ -218,8 +216,6 @@ class MinimalService(Node):
             response.response = "Interpolacja niemozliwa. " + e.args[0]
             return response
 
-
-    
     def request_check_interpolation_type(self, request):
         if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Polynomial'):
             err = 'Zly typ interpolacji'
@@ -240,7 +236,6 @@ class MinimalService(Node):
                 inRange = False
         return inRange
 
-
     def find_rectangle_points(self, request):
         A = Point(x=self.pos_x , y=self.pos_y, z=self.pos_z)
         B = Point(x=self.pos_x + request.param_a, y=self.pos_y, z=self.pos_z)
@@ -257,7 +252,6 @@ class MinimalService(Node):
             points.append(new_point)
         return points
     
-
     def request_check_ellipse(self, request):
         inRange = True
         points = self.find_ellipse_points(request)
@@ -265,7 +259,6 @@ class MinimalService(Node):
             if not self.check_if_goal_is_in_range([point.x, point.y, point.z]):
                 inRange = False
         return inRange
-
 
     def request_check_time(self, request):
         if(request.time <= 0):
@@ -290,15 +283,15 @@ class MinimalService(Node):
     
     def draw_rectangle(self, request):
         self.marker_show()
-        quarter = request.time/4
+        side1 = request.time*request.param_a/(2*(request.param_a+request.param_b))
+        side2 = request.time*request.param_b/(2*(request.param_a+request.param_b))
         points = self.find_rectangle_points(request)
 
-        self.linear_interpolation(points[1].x, points[1].y, points[1].z, quarter)
-        self.linear_interpolation(points[2].x, points[2].y, points[2].z, quarter)
-        self.linear_interpolation(points[3].x, points[3].y, points[3].z, quarter)
-        self.linear_interpolation(points[0].x, points[0].y, points[0].z, quarter)
+        self.linear_interpolation(points[1].x, points[1].y, points[1].z, side1)
+        self.linear_interpolation(points[2].x, points[2].y, points[2].z, side2)
+        self.linear_interpolation(points[3].x, points[3].y, points[3].z, side1)
+        self.linear_interpolation(points[0].x, points[0].y, points[0].z, side2)
 
-    
     def draw_ellipse(self, request):
         self.marker_show()
         moves = (int)(request.time/self.rate)
@@ -307,11 +300,6 @@ class MinimalService(Node):
 
         for point in points:
             self.linear_interpolation(point.x , point.y, point.z, time_fragment)
-
-
-
- 
- 
 
 
 def read_params():
