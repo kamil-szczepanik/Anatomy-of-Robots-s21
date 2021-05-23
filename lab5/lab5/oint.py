@@ -26,10 +26,10 @@ class MinimalClientAsync(Node):
             self.request.interpolation_type = sys.argv[5]
 
         except IndexError:
-            print("Niepoprawna liczba parametrow")
+            print("Niepoprawna liczba parametrów")
             raise IndexError()
         except ValueError:
-            print("Bledne parametry")
+            print("Błędne parametry")
             raise ValueError()
 
         self.future = self.client.call_async(self.request)
@@ -41,7 +41,7 @@ def main(args=None):
         client = MinimalClientAsync()
         client.send_request()
     except Exception as e:
-        print("Nie udalo sie uruchomic klienta")
+        print("Nie udało się uruchomić klienta")
         print(e)
     else:
         try:
@@ -53,7 +53,10 @@ def main(args=None):
                     except Exception as e:
                         client.get_logger().error("Interpolacja nieudana: " + str(e))
                     else:
-                        client.get_logger().info(response.response)
+                        if response.response[0:24] == "Interpolacja niemożliwa.":
+                            client.get_logger().error(response.response)
+                        else:
+                            client.get_logger().info(response.response)
                         return
         except KeyboardInterrupt:
             client.get_logger().warning("Nie otrzymano informacji zwrotnej")

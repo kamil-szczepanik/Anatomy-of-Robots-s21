@@ -56,11 +56,11 @@ class MinimalService(Node):
             elif request.interpolation_type == "Polynomial":
                 self.polynomial_interpolation(request.x, request.y, request.z, request.time)
             
-            response.response = "Interpolacja zakonczona pomyslnie"
+            response.response = "Interpolacja zakończona pomyślnie"
             return response
         
         except ValueError as e:
-            response.response = "Interpolacja niemozliwa. " + e.args[0]
+            response.response = "Interpolacja niemożliwa. " + e.args[0]
             return response
         
     def linear_interpolation(self, req_x, req_y, req_z, int_time):
@@ -139,7 +139,7 @@ class MinimalService(Node):
             raise ValueError(err)
 
         if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Polynomial'):
-            err = 'Zly typ interpolacji'
+            err = 'Zły typ interpolacji'
             self.get_logger().error(err)
             raise ValueError(err)
 
@@ -199,32 +199,32 @@ class MinimalService(Node):
 
             if request.trajectory_type == "Rectangle":
                 if not self.request_check_rectangle_points(request):
-                    raise ValueError("Punkty prostokąta poza zasiegiem")
+                    raise ValueError("Punkty prostokąta poza zasięgiem")
                 else:
                     self.draw_rectangle(request)
 
             elif request.trajectory_type == "Ellipse":
                 if not self.request_check_ellipse(request):
-                    raise ValueError("Punkty elipsy poza zasiegiem")
+                    raise ValueError("Punkty elipsy poza zasięgiem")
                 else:
                     self.draw_ellipse(request)
 
-            response.response = "Interpolacja zakonczona pomyslnie"
+            response.response = "Interpolacja zakończona pomyślnie"
             return response
         
         except ValueError as e:
-            response.response = "Interpolacja niemozliwa. " + e.args[0]
+            response.response = "Interpolacja niemożliwa. " + e.args[0]
             return response
 
     def request_check_interpolation_type(self, request):
         if(request.interpolation_type != 'Linear' and request.interpolation_type != 'Polynomial'):
-            err = 'Zly typ interpolacji'
+            err = 'Zły typ interpolacji'
             self.get_logger().error(err)
             raise ValueError(err)
 
     def request_check_trajectory_type(self, request):
         if(request.trajectory_type != 'Rectangle' and request.trajectory_type != 'Ellipse'):
-            err = 'Zly typ trajektorii'
+            err = 'Zły typ trajektorii'
             self.get_logger().error(err)
             raise ValueError(err)
 
@@ -297,8 +297,9 @@ class MinimalService(Node):
     def draw_ellipse(self, request):
         self.marker_show()
         moves = (int)(request.time/self.rate)
-        time_fragment = request.time/moves
         points = self.find_ellipse_points(request)
+
+        time_fragment = request.time/(moves+1)
 
         for point in points:
             self.linear_interpolation(point.x , point.y, point.z, time_fragment)
