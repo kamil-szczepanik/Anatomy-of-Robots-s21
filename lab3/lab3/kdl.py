@@ -13,18 +13,21 @@ from tf2_ros import TransformBroadcaster, TransformStamped
 from rclpy.clock import ROSClock
 import pprint
 
-from PyKDL import *
-# from PyKDL import Chain, Joint, Frame, Rotation, Vector, Segment, ChainFkSolverPos_recursive, JntToCart
+# from PyKDL import *
+from PyKDL import Chain, Joint, Frame, Rotation, Vector, Segment, ChainFkSolverPos_recursive, JntToCart, JntArray
 
 class KDL_DKIN(Node):
 
     def __init__(self):
         super().__init__('KDL_DKIN')
 
+        self.pose_publisher = self.create_publisher(PoseStamped, '/pose_stamped_kdl', qos_profile)
+
         self.subscription = self.create_subscription(
             JointState,
             'joint_states',
             self.listener_callback, 10)
+        
 
 
     def listener_callback(self, msg):
@@ -108,7 +111,7 @@ class KDL_DKIN(Node):
 
 
         qos_profile = QoSProfile(depth=10)
-        pose_publisher = self.create_publisher(PoseStamped, '/pose_stamped_kdl', qos_profile)
+        
 
         pose = PoseStamped()
         pose.header.stamp = ROSClock().now().to_msg()
@@ -119,7 +122,7 @@ class KDL_DKIN(Node):
         pose.pose.position.z = xyz[2]
         pose.pose.orientation = Quaternion(x=qua[0], y=qua[1], z=qua[2], w=qua[3])
 
-        pose_publisher.publish(pose)
+        self.pose_publisher.publish(pose)
 
 class XYZ_RPY:
     def __init__(self):
