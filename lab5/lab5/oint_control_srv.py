@@ -251,10 +251,12 @@ class MinimalService(Node):
     def find_ellipse_points(self, request):
         moves = (int)(request.time/self.rate)
         points = []
+        first_point = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
         for i in range(moves):
             centre_x = self.pos_x-request.param_a
             new_point = Point(x=centre_x+request.param_a*cos(2*pi*i/moves), y=self.pos_y, z=self.pos_z + request.param_b*sin(2*pi*i/moves))
             points.append(new_point)
+        points.append(first_point)
         return points
     
 
