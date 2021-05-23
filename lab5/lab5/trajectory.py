@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
 
+import time
 import sys
 
 from interpolation_srv.srv import TrajectoryPath
@@ -59,8 +60,13 @@ def main(args=None):
                 except Exception as e:
                     client.get_logger().error("Interpolacja nieudana: " + str(e))
                 else:
-                    client.get_logger().info(response.response)
-                    return
+                    try:
+                        while True:
+                            client.send_request()
+                            time.sleep(client.request.time)
+                    except KeyboardInterrupt:
+                        client.get_logger().info(response.response)
+                        return
     finally:
         client.destroy_node()
         rclpy.shutdown()
