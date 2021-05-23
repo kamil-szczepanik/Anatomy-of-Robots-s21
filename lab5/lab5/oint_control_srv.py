@@ -197,15 +197,13 @@ class MinimalService(Node):
 
             if request.trajectory_type == "Rectangle":
                 if not self.request_check_rectangle_points(request):
-                    response.response = "Interpolacja niemozliwa. Punkty prostokąta poza zasiegiem"
-                    raise ValueError("Interpolacja niemozliwa. Punkty prostokąta poza zasiegiem")
+                    raise ValueError("Punkty prostokąta poza zasiegiem")
                 else:
                     self.draw_rectangle(request)
 
             elif request.trajectory_type == "Ellipse":
                 if not self.request_check_ellipse(request):
-                    response.response = "Interpolacja niemozliwa. Punkty elipsy poza zasiegiem"
-                    raise ValueError("Interpolacja niemozliwa. Punkty elipsy poza zasiegiem")
+                    raise ValueError("Punkty elipsy poza zasiegiem")
                 else:
                     self.draw_ellipse(request)
 

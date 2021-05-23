@@ -48,16 +48,19 @@ def main(args=None):
         print("Nie udalo sie uruchomic klienta")
         print(e)
     else:
-        while rclpy.ok():
-            rclpy.spin_once(client)
-            if client.future.done():
-                try:
-                    response = client.future.result()
-                except Exception as e:
-                    client.get_logger().error("Interpolacja nieudana: " + str(e))
-                else:
-                    client.get_logger().info(response.response)
-                    return
+        try:
+            while rclpy.ok():
+                rclpy.spin_once(client)
+                if client.future.done():
+                    try:
+                        response = client.future.result()
+                    except Exception as e:
+                        client.get_logger().error("Interpolacja nieudana: " + str(e))
+                    else:
+                        client.get_logger().info(response.response)
+                        return
+        except KeyboardInterrupt:
+            client.get_logger().warning("Nie otrzymano informacji zwrotnej")
     finally:
         client.destroy_node()
         rclpy.shutdown()
