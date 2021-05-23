@@ -244,7 +244,7 @@ class MinimalService(Node):
         return [A, B, C, D]
 
     def find_ellipse_points(self, request):
-        moves = (int)(request.time/self.rate)
+        moves = (int)(request.time/self.rate)-1
         points = []
         first_point = Point(x=self.pos_x, y=self.pos_y, z=self.pos_z)
         for i in range(moves):
@@ -299,7 +299,7 @@ class MinimalService(Node):
         moves = (int)(request.time/self.rate)
         points = self.find_ellipse_points(request)
 
-        time_fragment = request.time/(moves+1)
+        time_fragment = request.time/moves
 
         for point in points:
             self.linear_interpolation(point.x , point.y, point.z, time_fragment)
